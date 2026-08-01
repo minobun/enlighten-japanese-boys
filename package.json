@@ -8,7 +8,8 @@
   },
   "scripts": {
     "studio": "remotion studio",
-    "render": "remotion render"
+    "render": "remotion render",
+    "validate": "tsx scripts/validate.ts"
   },
   "dependencies": {
     "@remotion/cli": "4.0.503",
@@ -20,6 +21,7 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@types/node": "^26.1.2",
     "@types/react": "19.2.7",
     "@types/web": "0.0.166",
     "tsx": "^4.19.2",

@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { findContentFile } from "./contentFile";
 import { loadEpisode } from "../src/loadEpisode";
-import type { Episode } from "../src/schema";
+import { narrationLines } from "../src/narration";
 import { defaultVoice } from "../src/schema";
 
 const AUDIO_DIR = join(__dirname, "..", "public", "audio");
@@ -13,7 +13,6 @@ const SPEAKER_ID = 3; // ずんだもん・ノーマル(docs/spec.md §6.2)
 type VoiceParams = typeof defaultVoice;
 type AudioQuery = Record<string, unknown>;
 type Manifest = Record<string, string>;
-type NarrationLine = { key: string; text: string };
 
 const checkEngine = async (): Promise<void> => {
   try {
@@ -29,17 +28,6 @@ const checkEngine = async (): Promise<void> => {
     );
     process.exit(1);
   }
-};
-
-// narration の行単位でキーを振る(Issue #8。#10 の字幕タイミング算出もこの命名に依存する)
-const buildNarrationLines = (episode: Episode): NarrationLine[] => {
-  const lines: NarrationLine[] = [];
-  episode.hookNarration.forEach((text, i) => lines.push({ key: `hook_${i + 1}`, text }));
-  for (const item of episode.items) {
-    item.narration.forEach((text, i) => lines.push({ key: `item${item.no}_${i + 1}`, text }));
-  }
-  episode.outroNarration.forEach((text, i) => lines.push({ key: `outro_${i + 1}`, text }));
-  return lines;
 };
 
 const hashLine = (text: string, voice: VoiceParams): string =>
@@ -89,7 +77,8 @@ const main = async () => {
     ? JSON.parse(readFileSync(manifestPath, "utf-8"))
     : {};
 
-  const lines = buildNarrationLines(episode);
+  // キーの命名規則は src/narration.ts に集約(尺算出・再生側と同じキーを見る必要がある)
+  const lines = narrationLines(episode);
   const nextManifest: Manifest = {};
   let synthCount = 0;
   let skipCount = 0;

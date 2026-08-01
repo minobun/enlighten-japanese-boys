@@ -1,9 +1,9 @@
 import { Composition } from "remotion";
 import { z } from "zod";
 import ep01Raw from "../content/ep01-appearance-part1.json";
-import { Episode, TOTAL_DURATION_IN_FRAMES } from "./Episode";
+import { Episode } from "./Episode";
 import { loadEpisode } from "./loadEpisode";
-import { calculateMetadata } from "./metadata";
+import { calculateMetadata, FPS } from "./metadata";
 import { episodeSchema } from "./schema";
 
 // Studio 上でセーフエリアの境界線表示を切り替えるための開発用フラグ(docs/spec.md §3)。
@@ -26,9 +26,8 @@ export const RemotionRoot: React.FC = () => {
     <Composition
       id="Episode"
       component={Episode}
-      // 尺は仮の固定値(Phase 4 で calculateMetadata による自動算出に置き換える。docs/spec.md §8)
-      durationInFrames={TOTAL_DURATION_IN_FRAMES}
-      fps={30}
+      // 尺(durationInFrames)は書かない。calculateMetadata が音声実長から算出する(docs/spec.md §8)
+      fps={FPS}
       width={1080}
       height={1920}
       schema={compositionSchema}

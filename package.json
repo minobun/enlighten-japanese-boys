@@ -1,0 +1,28 @@
+{
+  "name": "enlighten-japanese-boys",
+  "version": "1.0.0",
+  "private": true,
+  "description": "YouTube Shorts「アラサー男性による恋愛NG集 3選」の量産システム",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.503",
+    "@remotion/google-fonts": "4.0.503",
+    "@remotion/media-utils": "4.0.503",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.503",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.7",
+    "@types/web": "0.0.166",
+    "tsx": "^4.19.2",
+    "typescript": "5.9.3"
+  }
+}

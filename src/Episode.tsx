@@ -23,7 +23,16 @@ export const TOTAL_DURATION_IN_FRAMES =
 
 // docs/spec.md §4.2: Hook → Item×3 → Outro を通しで組み立てる。
 // 全シーンを <SafeArea> でラップし、装飾である <ProgressBar> はセーフエリア外に重ねる。
-export const Episode: React.FC<Props> = ({ hook, items, outro, nextTeaser, debugSafeArea }) => {
+export const Episode: React.FC<Props> = ({
+  id,
+  hook,
+  hookNarration,
+  items,
+  outro,
+  outroNarration,
+  nextTeaser,
+  debugSafeArea,
+}) => {
   const hookFrom = 0;
   const itemFroms = items.map(
     (_, index) => hookFrom + HOOK_DURATION_IN_FRAMES + index * ITEM_DURATION_IN_FRAMES,
@@ -34,7 +43,12 @@ export const Episode: React.FC<Props> = ({ hook, items, outro, nextTeaser, debug
     <AbsoluteFill style={{ backgroundColor: color.ground }}>
       <SafeArea debug={debugSafeArea}>
         <Sequence layout="none" from={hookFrom} durationInFrames={HOOK_DURATION_IN_FRAMES}>
-          <Hook hook={hook} />
+          <Hook
+            hook={hook}
+            id={id}
+            narrationLineCount={hookNarration.length}
+            durationInFrames={HOOK_DURATION_IN_FRAMES}
+          />
         </Sequence>
         {items.map((item, index) => (
           <Sequence
@@ -43,11 +57,17 @@ export const Episode: React.FC<Props> = ({ hook, items, outro, nextTeaser, debug
             from={itemFroms[index]}
             durationInFrames={ITEM_DURATION_IN_FRAMES}
           >
-            <Item {...item} />
+            <Item {...item} id={id} />
           </Sequence>
         ))}
         <Sequence layout="none" from={outroFrom} durationInFrames={OUTRO_DURATION_IN_FRAMES}>
-          <Outro outro={outro} nextTeaser={nextTeaser} />
+          <Outro
+            outro={outro}
+            nextTeaser={nextTeaser}
+            id={id}
+            narrationLineCount={outroNarration.length}
+            durationInFrames={OUTRO_DURATION_IN_FRAMES}
+          />
         </Sequence>
       </SafeArea>
       <ProgressBar />

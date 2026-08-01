@@ -8,7 +8,7 @@
   },
   "scripts": {
     "studio": "remotion studio",
-    "render": "remotion render",
+    "render": "tsx scripts/render.ts",
     "validate": "tsx scripts/validate.ts",
     "synthesize": "tsx scripts/synthesize.ts"
   },

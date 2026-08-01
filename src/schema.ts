@@ -36,9 +36,11 @@ export const episodeSchema = z.object({
   id: z.string(), // "ep01"
   part: z.number(), // 1
   category: z.string(), // "見た目編"
-  hook: z.array(z.string()), // フックの文言
+  hook: z.array(z.string()), // フックの画面文言
+  hookNarration: z.array(z.string()), // フックの読み上げ文(TTS 専用。docs/spec.md §6.4)
   items: z.array(itemSchema).length(3),
-  outro: z.array(z.string()),
+  outro: z.array(z.string()), // 締めの画面文言
+  outroNarration: z.array(z.string()), // 締めの読み上げ文(TTS 専用)
   nextTeaser: z.string(),
   voice: voiceSchema.optional(),
 });

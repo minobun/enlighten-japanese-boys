@@ -1,6 +1,8 @@
 import { Composition } from "remotion";
 import { z } from "zod";
+import ep01Raw from "../content/ep01-appearance-part1.json";
 import { Episode, TOTAL_DURATION_IN_FRAMES } from "./Episode";
+import { loadEpisode } from "./loadEpisode";
 import { calculateMetadata } from "./metadata";
 import { episodeSchema } from "./schema";
 
@@ -12,44 +14,11 @@ const compositionSchema = episodeSchema.extend({
 
 type CompositionProps = z.infer<typeof compositionSchema>;
 
-// Phase 1 プレースホルダ。schema を満たすダミー文言(#4 でシーン組み立てに合わせて調整)
+const ep01 = loadEpisode(ep01Raw);
+
 const defaultProps: CompositionProps = {
+  ...ep01,
   debugSafeArea: false,
-  id: "ep01",
-  part: 1,
-  category: "見た目編",
-  hook: ["ダミーのフック"],
-  items: [
-    {
-      no: 1,
-      headline: "ダミー項目1",
-      sting: "ダミーの一言",
-      fact: ["ダミーの事実"],
-      action: "ダミーの行動",
-      stamp: "ダミーのスタンプ",
-      narration: ["ダミーのナレーション"],
-    },
-    {
-      no: 2,
-      headline: "ダミー項目2",
-      sting: "ダミーの一言",
-      fact: ["ダミーの事実"],
-      action: "ダミーの行動",
-      stamp: "ダミーのスタンプ",
-      narration: ["ダミーのナレーション"],
-    },
-    {
-      no: 3,
-      headline: "ダミー項目3",
-      sting: "ダミーの一言",
-      fact: ["ダミーの事実"],
-      action: "ダミーの行動",
-      stamp: "ダミーのスタンプ",
-      narration: ["ダミーのナレーション"],
-    },
-  ],
-  outro: ["ダミーの締め"],
-  nextTeaser: "ダミーの次回予告",
 };
 
 export const RemotionRoot: React.FC = () => {

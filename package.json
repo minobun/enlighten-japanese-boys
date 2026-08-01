@@ -9,6 +9,7 @@
   "scripts": {
     "studio": "remotion studio",
     "render": "tsx scripts/render.ts",
+    "thumbnail": "tsx scripts/thumbnail.ts",
     "validate": "tsx scripts/validate.ts",
     "synthesize": "tsx scripts/synthesize.ts",
     "timing": "tsx scripts/timing.ts",

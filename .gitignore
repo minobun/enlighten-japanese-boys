@@ -5,3 +5,7 @@ node_modules
 # 生成物(content/*.json から再生成可能)
 out
 public/audio
+
+# BGM 音源(オーナーが用意する素材。README だけコミットする)
+public/bgm/*
+!public/bgm/README.md

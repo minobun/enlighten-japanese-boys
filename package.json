@@ -11,7 +11,8 @@
     "render": "tsx scripts/render.ts",
     "validate": "tsx scripts/validate.ts",
     "synthesize": "tsx scripts/synthesize.ts",
-    "timing": "tsx scripts/timing.ts"
+    "timing": "tsx scripts/timing.ts",
+    "build:episode": "tsx scripts/build-episode.ts"
   },
   "dependencies": {
     "@remotion/cli": "4.0.503",

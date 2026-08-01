@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { findContentFile } from "./contentFile";
 import { loadEpisode } from "../src/loadEpisode";
@@ -7,7 +7,6 @@ import { loadEpisode } from "../src/loadEpisode";
 const ROOT_DIR = join(__dirname, "..");
 const CONTENT_DIR = join(ROOT_DIR, "content");
 const TSX_BIN = join(ROOT_DIR, "node_modules", ".bin", "tsx");
-const DESCRIPTION_SCRIPT = join(ROOT_DIR, "scripts", "description.ts");
 
 // content/ にある json 群の id 一覧(見つからない時の案内用。壊れたJSONは無視する)
 const listContentIds = (): string[] => {
@@ -70,12 +69,7 @@ const main = () => {
   runScript("3/6 synthesize", join(ROOT_DIR, "scripts", "synthesize.ts"), id);
   runScript("4/6 timing", join(ROOT_DIR, "scripts", "timing.ts"), id);
   runScript("5/6 render", join(ROOT_DIR, "scripts", "render.ts"), id);
-
-  if (existsSync(DESCRIPTION_SCRIPT)) {
-    runScript("6/6 description", DESCRIPTION_SCRIPT, id);
-  } else {
-    console.log("\n=== [6/6 description] scripts/description.ts が未実装のためスキップするのだ ===");
-  }
+  runScript("6/6 description", join(ROOT_DIR, "scripts", "description.ts"), id);
 
   console.log(`\n[${id}] ビルド完了なのだ: out/${id}.mp4`);
 };

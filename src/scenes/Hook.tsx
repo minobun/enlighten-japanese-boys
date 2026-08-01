@@ -1,6 +1,7 @@
 import { FadeIn } from "../components/FadeIn";
 import { Sign } from "../components/Sign";
-import { color, fontSize } from "../theme";
+import { checkFieldLines, formatOverflow, isOverflowing } from "../lineCount";
+import { color, fontSize, maxLines, typography } from "../theme";
 
 // Hook では標識は装飾。切り替えはさせず、小さめに置く(docs/spec.md §5.3)
 const SIGN_SIZE = 200;
@@ -13,6 +14,12 @@ type HookProps = {
 // 背景は Episode.tsx 側で color.ground を敷いているので、ここではテキストのみ扱う
 // (この div は SafeArea の padding 済みコンテンツ領域を 100% で満たす通常フローの要素)。
 export const Hook: React.FC<HookProps> = ({ hook }) => {
+  // 開発中に文字数オーバーへ気づけるようにする(docs/spec.md §5.2、判定ロジックは lineCount.ts に共通化)
+  const hookCheck = checkFieldLines("hook", hook, fontSize.hook, maxLines.hook);
+  if (isOverflowing(hookCheck)) {
+    console.warn(formatOverflow(hookCheck));
+  }
+
   return (
     <div
       style={{
@@ -34,8 +41,7 @@ export const Hook: React.FC<HookProps> = ({ hook }) => {
             <div
               key={index}
               style={{
-                fontSize: fontSize.hook,
-                fontWeight: 900,
+                ...typography.hook,
                 color: color.paper,
                 lineHeight: 1.3,
               }}

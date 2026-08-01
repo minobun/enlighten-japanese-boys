@@ -1,5 +1,6 @@
 import { FadeIn } from "../components/FadeIn";
-import { color, fontSize } from "../theme";
+import { checkFieldLines, formatOverflow, isOverflowing } from "../lineCount";
+import { color, fontSize, maxLines, typography } from "../theme";
 
 type OutroProps = {
   outro: string[];
@@ -7,7 +8,23 @@ type OutroProps = {
 };
 
 // docs/spec.md §4.2: 締め + 次回予告
+// outro は headline と同じサイズ、nextTeaser は stamp と同じサイズで表示するため、
+// 行数チェックもそれぞれの役割の maxLines を流用する。
 export const Outro: React.FC<OutroProps> = ({ outro, nextTeaser }) => {
+  const outroCheck = checkFieldLines("outro", outro, fontSize.headline, maxLines.headline);
+  if (isOverflowing(outroCheck)) {
+    console.warn(formatOverflow(outroCheck));
+  }
+  const teaserCheck = checkFieldLines(
+    "nextTeaser",
+    [nextTeaser],
+    fontSize.stamp,
+    maxLines.stamp,
+  );
+  if (isOverflowing(teaserCheck)) {
+    console.warn(formatOverflow(teaserCheck));
+  }
+
   return (
     <div
       style={{
@@ -22,17 +39,14 @@ export const Outro: React.FC<OutroProps> = ({ outro, nextTeaser }) => {
       <FadeIn>
         <div style={{ textAlign: "center" }}>
           {outro.map((line, index) => (
-            <div
-              key={index}
-              style={{ fontSize: fontSize.headline, fontWeight: 900, color: color.paper }}
-            >
+            <div key={index} style={{ ...typography.headline, color: color.paper }}>
               {line}
             </div>
           ))}
         </div>
       </FadeIn>
       <FadeIn style={{ marginTop: 24 }}>
-        <div style={{ fontSize: fontSize.stamp, color: color.mute, textAlign: "center" }}>
+        <div style={{ ...typography.stamp, color: color.mute, textAlign: "center" }}>
           {nextTeaser}
         </div>
       </FadeIn>

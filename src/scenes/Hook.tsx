@@ -1,3 +1,5 @@
+import { useCurrentFrame } from "remotion";
+import { activeLineIndex, Caption } from "../components/Caption";
 import { FadeIn } from "../components/FadeIn";
 import { Narration } from "../components/Narration";
 import { Sign } from "../components/Sign";
@@ -10,6 +12,7 @@ const SIGN_SIZE = 200;
 
 type HookProps = {
   hook: string[];
+  hookNarration: string[];
   id: string;
   layout: SceneLayout;
 };
@@ -17,18 +20,22 @@ type HookProps = {
 // docs/spec.md §4.2: 掴み。数字を大きく。
 // 背景は Episode.tsx 側で color.ground を敷いているので、ここではテキストのみ扱う
 // (この div は SafeArea の padding 済みコンテンツ領域を 100% で満たす通常フローの要素)。
-export const Hook: React.FC<HookProps> = ({ hook, id, layout }) => {
+export const Hook: React.FC<HookProps> = ({ hook, hookNarration, id, layout }) => {
   // 開発中に文字数オーバーへ気づけるようにする(docs/spec.md §5.2、判定ロジックは lineCount.ts に共通化)
   const hookCheck = checkFieldLines("hook", hook, fontSize.hook, maxLines.hook);
   if (isOverflowing(hookCheck)) {
     console.warn(formatOverflow(hookCheck));
   }
 
+  const frame = useCurrentFrame();
+  const currentLine = activeLineIndex(frame, layout.lines);
+
   return (
     <div
       style={{
         width: "100%",
         height: "100%",
+        position: "relative",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
@@ -36,6 +43,13 @@ export const Hook: React.FC<HookProps> = ({ hook, id, layout }) => {
       }}
     >
       <Narration id={id} lines={layout.lines} />
+      {currentLine >= 0 && (
+        <Caption
+          text={hookNarration[currentLine]}
+          timing={layout.lines[currentLine].timing}
+          startFrame={layout.lines[currentLine].from}
+        />
+      )}
 
       <div style={{ marginBottom: 56 }}>
         <Sign mode="prohibit" size={SIGN_SIZE} />

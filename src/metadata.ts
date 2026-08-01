@@ -7,6 +7,7 @@ import type { CalculateMetadataFunction } from "remotion";
 import { staticFile } from "remotion";
 import { narrationKey, narrationLines } from "./narration";
 import type { Episode, Item } from "./schema";
+import type { TimingChunk } from "./timing";
 
 // docs/spec.md §3。fps は動画スペックの定数で、シーンの尺とは無関係(Root.tsx と共有する)
 export const FPS = 30;
@@ -39,6 +40,8 @@ export type LineLayout = {
   key: string;
   from: number;
   durationInFrames: number; // 音声長 + 行間パディング(字幕はこの間ずっと出したままにする)
+  // {key}.timing.json の内容(docs/spec.md §7)。<Caption> のハイライトに使う。未生成なら undefined
+  timing?: TimingChunk[];
 };
 
 export type BlockLayout = {
@@ -219,6 +222,41 @@ const measureNarration = async (episode: Episode): Promise<Map<string, number>> 
   return new Map(measured);
 };
 
+// public/audio/{id}/{key}.timing.json を読む(docs/spec.md §7)。未生成(pnpm timing 未実行)の
+// 行は undefined のままにし、<Caption> 側のフォールバック表示に任せる
+const measureTiming = async (episode: Episode): Promise<Map<string, TimingChunk[]>> => {
+  const lines = narrationLines(episode);
+  const entries: (readonly [string, TimingChunk[]])[] = [];
+
+  await Promise.all(
+    lines.map(async ({ key }) => {
+      try {
+        const res = await fetch(staticFile(`audio/${episode.id}/${key}.timing.json`));
+        if (!res.ok) {
+          return;
+        }
+        entries.push([key, (await res.json()) as TimingChunk[]] as const);
+      } catch {
+        // timing.json 未生成。Caption はフォールバック表示にする
+      }
+    }),
+  );
+
+  return new Map(entries);
+};
+
+const attachTiming = (layout: EpisodeLayout, timings: Map<string, TimingChunk[]>): EpisodeLayout => {
+  const withTiming = (lines: LineLayout[]): LineLayout[] =>
+    lines.map((line) => ({ ...line, timing: timings.get(line.key) }));
+
+  return {
+    ...layout,
+    hook: { ...layout.hook, lines: withTiming(layout.hook.lines) },
+    items: layout.items.map((item) => ({ ...item, lines: withTiming(item.lines) })),
+    outro: { ...layout.outro, lines: withTiming(layout.outro.lines) },
+  };
+};
+
 const warnIfOffTarget = (durationInFrames: number, fps: number): void => {
   const seconds = durationInFrames / fps;
   if (seconds < TARGET_MIN_SEC || seconds > TARGET_MAX_SEC) {
@@ -236,8 +274,11 @@ type Props = Episode & {
 
 // docs/spec.md §8: 尺は音声長から自動算出する。フレーム数のハードコードはしない
 export const calculateMetadata: CalculateMetadataFunction<Props> = async ({ props }) => {
-  const durations = await measureNarration(props);
-  const layout = buildLayout(props, (key) => durations.get(key) ?? FALLBACK_LINE_SEC, FPS);
+  const [durations, timings] = await Promise.all([measureNarration(props), measureTiming(props)]);
+  const layout = attachTiming(
+    buildLayout(props, (key) => durations.get(key) ?? FALLBACK_LINE_SEC, FPS),
+    timings,
+  );
 
   warnIfOffTarget(layout.durationInFrames, FPS);
 

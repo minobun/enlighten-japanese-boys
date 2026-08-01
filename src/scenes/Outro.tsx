@@ -1,3 +1,5 @@
+import { useCurrentFrame } from "remotion";
+import { activeLineIndex, Caption } from "../components/Caption";
 import { FadeIn } from "../components/FadeIn";
 import { Narration } from "../components/Narration";
 import { checkFieldLines, formatOverflow, isOverflowing } from "../lineCount";
@@ -6,6 +8,7 @@ import { color, fontSize, maxLines, typography } from "../theme";
 
 type OutroProps = {
   outro: string[];
+  outroNarration: string[];
   nextTeaser: string;
   id: string;
   layout: SceneLayout;
@@ -14,7 +17,7 @@ type OutroProps = {
 // docs/spec.md §4.2: 締め + 次回予告
 // outro は headline と同じサイズ、nextTeaser は stamp と同じサイズで表示するため、
 // 行数チェックもそれぞれの役割の maxLines を流用する。
-export const Outro: React.FC<OutroProps> = ({ outro, nextTeaser, id, layout }) => {
+export const Outro: React.FC<OutroProps> = ({ outro, outroNarration, nextTeaser, id, layout }) => {
   const outroCheck = checkFieldLines("outro", outro, fontSize.headline, maxLines.headline);
   if (isOverflowing(outroCheck)) {
     console.warn(formatOverflow(outroCheck));
@@ -29,11 +32,15 @@ export const Outro: React.FC<OutroProps> = ({ outro, nextTeaser, id, layout }) =
     console.warn(formatOverflow(teaserCheck));
   }
 
+  const frame = useCurrentFrame();
+  const currentLine = activeLineIndex(frame, layout.lines);
+
   return (
     <div
       style={{
         width: "100%",
         height: "100%",
+        position: "relative",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
@@ -41,6 +48,13 @@ export const Outro: React.FC<OutroProps> = ({ outro, nextTeaser, id, layout }) =
       }}
     >
       <Narration id={id} lines={layout.lines} />
+      {currentLine >= 0 && (
+        <Caption
+          text={outroNarration[currentLine]}
+          timing={layout.lines[currentLine].timing}
+          startFrame={layout.lines[currentLine].from}
+        />
+      )}
 
       <FadeIn>
         <div style={{ textAlign: "center" }}>

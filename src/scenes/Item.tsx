@@ -1,4 +1,5 @@
-import { Sequence } from "remotion";
+import { Sequence, useCurrentFrame } from "remotion";
+import { activeLineIndex, Caption } from "../components/Caption";
 import { FadeIn } from "../components/FadeIn";
 import { Narration } from "../components/Narration";
 import { Sign } from "../components/Sign";
@@ -30,6 +31,7 @@ export const Item: React.FC<ItemComponentProps> = ({
   fact,
   action,
   stamp,
+  narration,
   id,
   layout,
 }) => {
@@ -46,6 +48,9 @@ export const Item: React.FC<ItemComponentProps> = ({
   warnIfOverflowing(`items[${no}].action`, [action], "action");
   warnIfOverflowing(`items[${no}].stamp`, [stamp], "stamp");
 
+  const frame = useCurrentFrame();
+  const currentLine = activeLineIndex(frame, layout.lines);
+
   return (
     <div
       style={{
@@ -58,6 +63,13 @@ export const Item: React.FC<ItemComponentProps> = ({
       }}
     >
       <Narration id={id} lines={layout.lines} />
+      {currentLine >= 0 && (
+        <Caption
+          text={narration[currentLine]}
+          timing={layout.lines[currentLine].timing}
+          startFrame={layout.lines[currentLine].from}
+        />
+      )}
 
       <div
         style={{

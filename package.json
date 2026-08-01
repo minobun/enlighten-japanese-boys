@@ -12,6 +12,7 @@
     "validate": "tsx scripts/validate.ts",
     "synthesize": "tsx scripts/synthesize.ts",
     "timing": "tsx scripts/timing.ts",
+    "description": "tsx scripts/description.ts",
     "build:episode": "tsx scripts/build-episode.ts"
   },
   "dependencies": {

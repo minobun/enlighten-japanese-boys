@@ -43,6 +43,7 @@ export const episodeSchema = z.object({
   outroNarration: z.array(z.string()), // 締めの読み上げ文(TTS 専用)
   nextTeaser: z.string(),
   voice: voiceSchema.optional(),
+  credits: z.array(z.string()).optional(), // BGM/SE等の素材クレジット(docs/spec.md §12 / Issue #14)。あれば概要欄に追記
 });
 
 export type Item = z.infer<typeof itemSchema>;

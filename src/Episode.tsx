@@ -1,4 +1,5 @@
 import { AbsoluteFill, Sequence, useVideoConfig } from "remotion";
+import { Bgm } from "./components/Bgm";
 import { ProgressBar } from "./components/ProgressBar";
 import { SafeArea } from "./components/SafeArea";
 import type { EpisodeLayout } from "./metadata";
@@ -20,13 +21,24 @@ type Props = EpisodeContent & {
 // 全シーンを <SafeArea> でラップし、装飾である <ProgressBar> はセーフエリア外に重ねる。
 // シーン・ブロックの開始フレームと尺は全て props の layout から来る(ここで尺を決めないこと)。
 export const Episode: React.FC<Props> = (props) => {
-  const { id, hook, hookNarration, items, outro, outroNarration, nextTeaser, debugSafeArea, layout } =
-    props;
+  const {
+    id,
+    hook,
+    hookNarration,
+    items,
+    outro,
+    outroNarration,
+    nextTeaser,
+    debugSafeArea,
+    layout,
+    bgm,
+  } = props;
   const { fps } = useVideoConfig();
   const resolved = layout ?? fallbackLayout(props, fps);
 
   return (
     <AbsoluteFill style={{ backgroundColor: color.ground }}>
+      {bgm && <Bgm bgm={bgm} durationInFrames={resolved.durationInFrames} fps={fps} />}
       <SafeArea debug={debugSafeArea}>
         <Sequence
           layout="none"

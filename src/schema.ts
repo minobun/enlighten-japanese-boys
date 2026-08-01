@@ -32,6 +32,12 @@ export const defaultVoice = {
   postPhonemeLength: 0.2,
 };
 
+// BGM 設定(docs/spec.md §13 / Issue #16)。音源ファイルはオーナーが public/bgm/ に配置する
+export const bgmSchema = z.object({
+  file: z.string(), // 例: "main.mp3"(public/bgm/ からの相対パス)
+  volume: z.number().default(0.1), // ナレーションを邪魔しない音量
+});
+
 export const episodeSchema = z.object({
   id: z.string(), // "ep01"
   part: z.number(), // 1
@@ -44,6 +50,7 @@ export const episodeSchema = z.object({
   nextTeaser: z.string(),
   voice: voiceSchema.optional(),
   credits: z.array(z.string()).optional(), // BGM/SE等の素材クレジット(docs/spec.md §12 / Issue #14)。あれば概要欄に追記
+  bgm: bgmSchema.optional(),
 });
 
 export type Item = z.infer<typeof itemSchema>;

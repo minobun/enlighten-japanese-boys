@@ -1,5 +1,9 @@
 import { FadeIn } from "../components/FadeIn";
+import { Sign } from "../components/Sign";
 import { color, fontSize } from "../theme";
+
+// Hook では標識は装飾。切り替えはさせず、小さめに置く(docs/spec.md §5.3)
+const SIGN_SIZE = 200;
 
 type HookProps = {
   hook: string[];
@@ -20,6 +24,10 @@ export const Hook: React.FC<HookProps> = ({ hook }) => {
         alignItems: "center",
       }}
     >
+      <div style={{ marginBottom: 56 }}>
+        <Sign mode="prohibit" size={SIGN_SIZE} />
+      </div>
+
       <FadeIn>
         <div style={{ textAlign: "center" }}>
           {hook.map((line, index) => (

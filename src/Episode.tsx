@@ -20,7 +20,8 @@ type Props = EpisodeContent & {
 // 全シーンを <SafeArea> でラップし、装飾である <ProgressBar> はセーフエリア外に重ねる。
 // シーン・ブロックの開始フレームと尺は全て props の layout から来る(ここで尺を決めないこと)。
 export const Episode: React.FC<Props> = (props) => {
-  const { id, hook, items, outro, nextTeaser, debugSafeArea, layout } = props;
+  const { id, hook, hookNarration, items, outro, outroNarration, nextTeaser, debugSafeArea, layout } =
+    props;
   const { fps } = useVideoConfig();
   const resolved = layout ?? fallbackLayout(props, fps);
 
@@ -32,7 +33,7 @@ export const Episode: React.FC<Props> = (props) => {
           from={resolved.hook.from}
           durationInFrames={resolved.hook.durationInFrames}
         >
-          <Hook hook={hook} id={id} layout={resolved.hook} />
+          <Hook hook={hook} hookNarration={hookNarration} id={id} layout={resolved.hook} />
         </Sequence>
         {items.map((item, index) => {
           const itemLayout = resolved.items[index];
@@ -52,7 +53,13 @@ export const Episode: React.FC<Props> = (props) => {
           from={resolved.outro.from}
           durationInFrames={resolved.outro.durationInFrames}
         >
-          <Outro outro={outro} nextTeaser={nextTeaser} id={id} layout={resolved.outro} />
+          <Outro
+            outro={outro}
+            outroNarration={outroNarration}
+            nextTeaser={nextTeaser}
+            id={id}
+            layout={resolved.outro}
+          />
         </Sequence>
       </SafeArea>
       <ProgressBar />

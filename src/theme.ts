@@ -20,6 +20,8 @@ export const fontSize = {
   fact: 56,
   action: 84,
   stamp: 52,
+  thumbnailTitle: 116, // サムネイル専用: 「恋愛NG集 3選」(docs/spec.md §13 / Issue #15)
+  thumbnailSubtitle: 68, // サムネイル専用: 「{category} PART{part}」
 };
 
 export const maxLines: Record<keyof typeof fontSize, number> = {
@@ -29,6 +31,8 @@ export const maxLines: Record<keyof typeof fontSize, number> = {
   fact: 2,
   action: 2,
   stamp: 1,
+  thumbnailTitle: 1,
+  thumbnailSubtitle: 1,
 };
 
 export const safeArea = {
@@ -80,6 +84,16 @@ export const typography: Record<
   fact: { fontSize: fontSize.fact, fontFamily: fontFamily.jp, fontWeight: fontWeight.bold },
   action: { fontSize: fontSize.action, fontFamily: fontFamily.jp, fontWeight: fontWeight.black },
   stamp: { fontSize: fontSize.stamp, fontFamily: fontFamily.jp, fontWeight: fontWeight.bold },
+  thumbnailTitle: {
+    fontSize: fontSize.thumbnailTitle,
+    fontFamily: fontFamily.jp,
+    fontWeight: fontWeight.black,
+  },
+  thumbnailSubtitle: {
+    fontSize: fontSize.thumbnailSubtitle,
+    fontFamily: fontFamily.jp,
+    fontWeight: fontWeight.black,
+  },
 };
 
 // 番号・ラベル等、英数字表示に使う書体(docs/spec.md §5.2)

@@ -61,17 +61,18 @@ const main = () => {
     process.exit(1);
   }
 
-  console.log(`\n=== [1/6 content validate] 開始 ===`);
+  console.log(`\n=== [1/7 content validate] 開始 ===`);
   validateContent(id);
-  console.log(`=== [1/6 content validate] 完了 ===`);
+  console.log(`=== [1/7 content validate] 完了 ===`);
 
-  runScript("2/6 line-count validate", join(ROOT_DIR, "scripts", "validate.ts"), id);
-  runScript("3/6 synthesize", join(ROOT_DIR, "scripts", "synthesize.ts"), id);
-  runScript("4/6 timing", join(ROOT_DIR, "scripts", "timing.ts"), id);
-  runScript("5/6 render", join(ROOT_DIR, "scripts", "render.ts"), id);
-  runScript("6/6 description", join(ROOT_DIR, "scripts", "description.ts"), id);
+  runScript("2/7 line-count validate", join(ROOT_DIR, "scripts", "validate.ts"), id);
+  runScript("3/7 synthesize", join(ROOT_DIR, "scripts", "synthesize.ts"), id);
+  runScript("4/7 timing", join(ROOT_DIR, "scripts", "timing.ts"), id);
+  runScript("5/7 render", join(ROOT_DIR, "scripts", "render.ts"), id);
+  runScript("6/7 thumbnail", join(ROOT_DIR, "scripts", "thumbnail.ts"), id);
+  runScript("7/7 description", join(ROOT_DIR, "scripts", "description.ts"), id);
 
-  console.log(`\n[${id}] ビルド完了なのだ: out/${id}.mp4`);
+  console.log(`\n[${id}] ビルド完了なのだ: out/${id}.mp4 / out/${id}.thumbnail.png`);
 };
 
 main();

@@ -1,0 +1,7 @@
+node_modules
+.DS_Store
+.env
+
+# 生成物(content/*.json から再生成可能)
+out
+public/audio

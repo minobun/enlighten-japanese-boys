@@ -1,11 +1,11 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { findContentFile } from "./contentFile";
 import { loadEpisode } from "../src/loadEpisode";
 import type { Episode } from "../src/schema";
 import { defaultVoice } from "../src/schema";
 
-const CONTENT_DIR = join(__dirname, "..", "content");
 const AUDIO_DIR = join(__dirname, "..", "public", "audio");
 const ENGINE_URL = process.env.VOICEVOX_URL ?? "http://localhost:50021";
 const SPEAKER_ID = 3; // ずんだもん・ノーマル(docs/spec.md §6.2)
@@ -14,22 +14,6 @@ type VoiceParams = typeof defaultVoice;
 type AudioQuery = Record<string, unknown>;
 type Manifest = Record<string, string>;
 type NarrationLine = { key: string; text: string };
-
-// content/ 以下は `{id}-何らかの説明.json` のような名前で置かれるため、
-// id 前方一致でファイルを探す(Issue #8)
-const findContentFile = (id: string): string => {
-  const files = readdirSync(CONTENT_DIR).filter((name) => name.endsWith(".json"));
-  const matches = files.filter((name) => name === `${id}.json` || name.startsWith(`${id}-`));
-  if (matches.length === 0) {
-    throw new Error(`content/ 以下に id="${id}" に前方一致する JSON が見つからないのだ`);
-  }
-  if (matches.length > 1) {
-    throw new Error(
-      `id="${id}" に前方一致する JSON が複数見つかったのだ: ${matches.join(", ")}`,
-    );
-  }
-  return join(CONTENT_DIR, matches[0]);
-};
 
 const checkEngine = async (): Promise<void> => {
   try {

@@ -1,5 +1,6 @@
 import { Sequence } from "remotion";
 import { FadeIn } from "../components/FadeIn";
+import { Narration } from "../components/Narration";
 import { Sign } from "../components/Sign";
 import { checkFieldLines, formatOverflow, isOverflowing } from "../lineCount";
 import type { Item as ItemProps } from "../schema";
@@ -32,8 +33,19 @@ const warnIfOverflowing = (field: string, inputLines: string[], role: keyof type
   }
 };
 
+type ItemComponentProps = ItemProps & { id: string };
+
 // 全 Item 共通の内部構造(docs/spec.md §4.2): 宣告 → 事実 → 行動 → スタンプ
-export const Item: React.FC<ItemProps> = ({ no, headline, sting, fact, action, stamp }) => {
+export const Item: React.FC<ItemComponentProps> = ({
+  no,
+  headline,
+  sting,
+  fact,
+  action,
+  stamp,
+  narration,
+  id,
+}) => {
   warnIfOverflowing(`items[${no}].headline`, [headline], "headline");
   warnIfOverflowing(`items[${no}].sting`, [sting], "sting");
   warnIfOverflowing(`items[${no}].fact`, fact, "fact");
@@ -51,6 +63,13 @@ export const Item: React.FC<ItemProps> = ({ no, headline, sting, fact, action, s
         alignItems: "center",
       }}
     >
+      <Narration
+        id={id}
+        keyPrefix={`item${no}`}
+        lineCount={narration.length}
+        durationInFrames={ITEM_DURATION_IN_FRAMES}
+      />
+
       <div
         style={{
           position: "absolute",

@@ -1,16 +1,26 @@
 import { FadeIn } from "../components/FadeIn";
+import { Narration } from "../components/Narration";
 import { checkFieldLines, formatOverflow, isOverflowing } from "../lineCount";
 import { color, fontSize, maxLines, typography } from "../theme";
 
 type OutroProps = {
   outro: string[];
   nextTeaser: string;
+  id: string;
+  narrationLineCount: number;
+  durationInFrames: number;
 };
 
 // docs/spec.md §4.2: 締め + 次回予告
 // outro は headline と同じサイズ、nextTeaser は stamp と同じサイズで表示するため、
 // 行数チェックもそれぞれの役割の maxLines を流用する。
-export const Outro: React.FC<OutroProps> = ({ outro, nextTeaser }) => {
+export const Outro: React.FC<OutroProps> = ({
+  outro,
+  nextTeaser,
+  id,
+  narrationLineCount,
+  durationInFrames,
+}) => {
   const outroCheck = checkFieldLines("outro", outro, fontSize.headline, maxLines.headline);
   if (isOverflowing(outroCheck)) {
     console.warn(formatOverflow(outroCheck));
@@ -36,6 +46,13 @@ export const Outro: React.FC<OutroProps> = ({ outro, nextTeaser }) => {
         alignItems: "center",
       }}
     >
+      <Narration
+        id={id}
+        keyPrefix="outro"
+        lineCount={narrationLineCount}
+        durationInFrames={durationInFrames}
+      />
+
       <FadeIn>
         <div style={{ textAlign: "center" }}>
           {outro.map((line, index) => (

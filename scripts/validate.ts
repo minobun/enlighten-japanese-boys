@@ -1,30 +1,10 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync } from "node:fs";
+import { findContentFile } from "./contentFile";
 import type { FieldCheckResult } from "../src/lineCount";
 import { checkFieldLines, formatOverflow, isOverflowing } from "../src/lineCount";
 import { loadEpisode } from "../src/loadEpisode";
 import type { Episode } from "../src/schema";
 import { fontSize, maxLines } from "../src/theme";
-
-const CONTENT_DIR = join(__dirname, "..", "content");
-
-// content/ 以下は `{id}-何らかの説明.json` のような名前で置かれるため、
-// ファイル名ではなく JSON 内の `id` フィールドで対象を探す(docs/spec.md §9)。
-const findContentFile = (id: string): string => {
-  const files = readdirSync(CONTENT_DIR).filter((name) => name.endsWith(".json"));
-  const match = files.find((name) => {
-    try {
-      const data = JSON.parse(readFileSync(join(CONTENT_DIR, name), "utf-8"));
-      return data.id === id;
-    } catch {
-      return false;
-    }
-  });
-  if (!match) {
-    throw new Error(`content/ 以下に id="${id}" の JSON が見つからないのだ`);
-  }
-  return join(CONTENT_DIR, match);
-};
 
 // 画面に表示される全テキストフィールドを、実際に使われるフォントサイズ・行数上限で検査する
 // (docs/spec.md §5.2)。判定ロジック自体は src/lineCount.ts に共通化し、シーン側の

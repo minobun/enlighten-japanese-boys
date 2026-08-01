@@ -1,0 +1,444 @@
+# 恋愛NG集 Shorts 自動生成システム — 実装仕様
+
+## 0. このドキュメントについて
+
+Claude Code への指示書。上から順に読んで実装すること。
+不明点は勝手に決めず、`### 判断が必要な箇所` にリストアップして質問すること。
+
+---
+
+## 1. 何を作るのか
+
+YouTube Shorts（縦動画・45秒前後）を **JSON を書き換えるだけで量産できる** システム。
+
+シリーズ構成:
+- 「アラサー男性による恋愛NG集 3選」
+- カテゴリ別に PART を重ねる（見た目編 PART1 / 服編 / 会話編 …）
+- **1本につき項目は必ず3つ**。増やさない
+
+ナレーションは **VOICEVOX のずんだもん**。
+
+### 重要な設計方針
+
+動画を1本ずつ「作る」のではない。**シーンの型を1個作って、コンテンツ JSON を流し込む**。
+PART2 以降でレイアウトコードを触る必要が出たら、その設計は失敗している。
+
+---
+
+## 2. 技術スタック
+
+| 用途           | 選定                                       |
+| -------------- | ------------------------------------------ |
+| 動画生成       | Remotion v4 (React + TypeScript)           |
+| 音声合成       | VOICEVOX ENGINE (Docker, ローカル)         |
+| 話者           | ずんだもん（ノーマル / `speaker: 3`）      |
+| 字幕タイミング | VOICEVOX の `audio_query` から算出（後述） |
+| パッケージ管理 | pnpm                                       |
+| レンダリング   | ローカル（`remotion render`）              |
+
+Node.js 20 以上。
+
+---
+
+## 3. 動画スペック
+
+```
+解像度: 1080 x 1920 (9:16)
+fps:    30
+尺:     音声長から自動算出（目安 40〜50秒）
+出力:   H.264 / mp4
+```
+
+### セーフエリア（厳守）
+
+YouTube Shorts の UI が被る領域。ここにテキストを置かないこと。
+
+```
+上:  120px  （タイトル・チャンネル名が乗る）
+下:  260px  （説明文・音源リンク・いいねボタン）
+右:  140px  （アクションボタン列）
+左:   60px  （余白として）
+```
+
+`<SafeArea>` コンポーネントを作り、全シーンをこれでラップする。
+開発中は `?safe=1` のような形でセーフエリアの枠線を可視化できるようにしておくと良い。
+
+---
+
+## 4. コンテンツ構造
+
+### 4.1 スキーマ
+
+`src/schema.ts` に Zod で定義する。Remotion Studio 上で props を編集できるようにするため必須。
+
+```ts
+import { z } from "zod";
+
+export const itemSchema = z.object({
+  no: z.number(),               // 1 | 2 | 3
+  headline: z.string(),         // 項目名（例: 剃った"つもり"の髭）
+  sting: z.string(),            // 刺す一言（例: その「剃ったつもり」が一番危ないのだ）
+  fact: z.array(z.string()),    // 相手側の事実（1〜2行）
+  action: z.string(),           // 今日やること（画面で最も強調される）
+  stamp: z.string(),            // 締めの一言
+  narration: z.array(z.string()),// TTS に読ませる文（行単位）
+});
+
+export const episodeSchema = z.object({
+  id: z.string(),               // "ep01"
+  part: z.number(),             // 1
+  category: z.string(),         // "見た目編"
+  hook: z.array(z.string()),    // フックの文言
+  items: z.array(itemSchema).length(3),
+  outro: z.array(z.string()),
+  nextTeaser: z.string(),
+});
+```
+
+`.length(3)` は意図的な制約。3つ以外を弾く。
+
+### 4.2 シーン構成
+
+```
+┌─────────────┬──────────────────────────────────────┐
+│ Hook        │ 0:00–0:02  掴み。数字を大きく         │
+│ Item ×3     │ 各 12〜13秒                          │
+│ Outro       │ 4秒  締め + 次回予告                  │
+└─────────────┴──────────────────────────────────────┘
+```
+
+Item は必ず同じ内部構造を持つ。視聴者に「次は行動指示が来る」と予測させるため。
+
+```
+宣告 (headline + sting)
+  ↓
+相手側の事実 (fact)
+  ↓
+今日やる具体行動 (action)  ← 最も大きく、最も長く表示
+  ↓
+スタンプ (stamp)
+```
+
+---
+
+## 5. ビジュアル設計
+
+モチーフは **安全標識**。禁止標識（赤丸＋斜線）から指示標識（青丸＋チェック）へ切り替わるのが画面の主役。
+サムネイルサイズでも「赤か青か」で意味が伝わることを最優先する。
+
+### 5.1 トークン
+
+`src/theme.ts` に定義。ここ以外に色を直書きしないこと。
+
+```ts
+export const color = {
+  ground:   "#0E1524",  // 背景（深い紺）
+  paper:    "#F2F0EA",  // 主テキスト
+  mute:     "#8B95A7",  // 補助テキスト
+  prohibit: "#D5202A",  // 禁止・NG
+  instruct: "#2E7BE0",  // 指示・OK
+  hairline: "rgba(242,240,234,0.14)",
+};
+```
+
+### 5.2 タイポグラフィ
+
+`@remotion/google-fonts` から読み込む。
+
+- 見出し / action: **Noto Sans JP Black (900)**
+- 本文 / fact: **Noto Sans JP Bold (700)**
+- 番号・ラベル（英数字）: **Roboto Mono Medium**
+
+サイズ目安（1080px幅基準）:
+
+| 役割     | px  | 行数上限 |
+| -------- | --- | -------- |
+| hook     | 92  | 3        |
+| headline | 76  | 2        |
+| sting    | 64  | 2        |
+| fact     | 56  | 2        |
+| action   | 84  | 2        |
+| stamp    | 52  | 1        |
+
+**行数上限を超えたらビルド時に警告を出すこと。** 文字数オーバーで崩れるのが一番多い事故。
+
+### 5.3 標識コンポーネント
+
+`<Sign mode="prohibit" | "instruct" />` を SVG で実装。
+
+- `prohibit`: 赤いリング（stroke 26px, r 150）＋ 45度の斜線。斜線は `scaleX` 0→1 で描画
+- `instruct`: 青い塗り円 ＋ チェックマーク。チェックは `strokeDasharray` のアニメーションで引く
+- 切り替えは `spring()` で。回転しながら赤が抜けて青が立ち上がる
+
+これがシリーズの識別記号になる。ここだけは凝ってよい。他は静かに保つ。
+
+### 5.4 動きの原則
+
+- テキストは「フェード＋4pxの上方向スライド」に統一。凝った動きは入れない
+- 標識の切り替わりだけが例外
+- カット間のトランジションは 6フレーム以内。Shorts では遅い演出が離脱を生む
+
+---
+
+## 6. 音声（VOICEVOX / ずんだもん）
+
+### 6.1 ENGINE の起動
+
+```bash
+docker run --rm -p 50021:50021 voicevox/voicevox_engine:cpu-ubuntu20.04-latest
+```
+
+`http://localhost:50021` で待ち受ける。起動確認は `GET /version`。
+
+### 6.2 合成フロー
+
+話者 ID は **3（ずんだもん・ノーマル）**。
+
+```
+POST /audio_query?text={text}&speaker=3
+  → AudioQuery(JSON) が返る
+  → speedScale などを調整（後述）
+POST /synthesis?speaker=3   body: AudioQuery
+  → wav バイナリ
+```
+
+`scripts/synthesize.ts` として実装する。
+
+- 入力: `content/{id}.json`
+- 出力: `public/audio/{id}/{key}.wav`（key は `hook`, `item1_sting` のように行単位）
+- **AudioQuery の JSON も `public/audio/{id}/{key}.query.json` として保存すること**（次項で使う）
+- 既に wav が存在し、元テキストが変わっていなければスキップ（ハッシュで判定）
+
+### 6.3 パラメータ調整
+
+AudioQuery を投げる前に以下を上書きする。値は `content/{id}.json` の任意フィールドで上書き可能にしておく。
+
+```ts
+{
+  speedScale: 1.15,   // Shorts はやや速めが合う
+  pitchScale: 0.0,
+  intonationScale: 1.1,
+  volumeScale: 1.0,
+  prePhonemeLength: 0.1,
+  postPhonemeLength: 0.2,
+}
+```
+
+### 6.4 口調について（重要）
+
+ずんだもんの声で標準語の断定調を読ませると強い違和感が出る。
+ナレーションは **「〜のだ / 〜なのだ」調** に寄せること。
+
+役割設定はこうする:
+
+- ずんだもん = **指摘する側**
+- 視聴者 = 当事者
+
+そのため「僕らみたいになるな」のような一人称複数は使わない。
+`headline` 等の画面テキストは通常の日本語のままでよい（読み上げない）。
+**読み上げるのは `narration` フィールドだけ。** 画面テキストと読み上げ文を分離すること。
+
+---
+
+## 7. 字幕タイミング（この方式を採用すること）
+
+Whisper で書き起こして合わせる方式は**採らない**。日本語の精度が不安定で、合成音声には過剰。
+
+VOICEVOX の `AudioQuery` には音素単位の長さが入っている。これを使えば**推定ではなく確定値で**タイムスタンプが出る。
+
+```ts
+// AudioQuery.accent_phrases[].moras[] は
+//   { text, consonant, consonant_length, vowel, vowel_length }
+// を持つ。pause_mora も同様。
+//
+// 累積時間 = prePhonemeLength
+//          + Σ (consonant_length + vowel_length) / speedScale
+// で各モーラの開始秒が求まる。
+```
+
+`scripts/timing.ts` として実装:
+
+- 入力: `*.query.json`
+- 出力: `public/audio/{id}/{key}.timing.json`
+  ```json
+  [{ "text": "髭", "startMs": 0, "endMs": 180 }, ...]
+  ```
+- モーラ単位では細かすぎるので、**文節または句読点単位にまとめる**オプションを持たせる
+
+字幕は `<Caption>` コンポーネントで、現在フレームに対応する塊をハイライト表示する。
+
+---
+
+## 8. 尺の自動算出
+
+**フレーム数を手で書かないこと。** 原稿を1行足すたびに全部ずれる。
+
+`src/metadata.ts` に `calculateMetadata` を実装:
+
+```ts
+import { getAudioDurationInSeconds } from "@remotion/media-utils";
+
+// 各シーンの尺 = そのシーンに属する音声の合計長 + パディング
+// パディング: シーン間 0.3s、Item 内の行間 0.15s
+// durationInFrames = Math.ceil(合計秒 * fps)
+```
+
+算出した各シーンの開始フレーム・長さを props としてシーンに渡し、
+`<Sequence from={...} durationInFrames={...}>` に流す。
+
+---
+
+## 9. ディレクトリ構成
+
+```
+.
+├── src/
+│   ├── Root.tsx                 # Composition 登録
+│   ├── Episode.tsx              # 全体の組み立て
+│   ├── metadata.ts              # calculateMetadata
+│   ├── schema.ts
+│   ├── theme.ts
+│   ├── scenes/
+│   │   ├── Hook.tsx
+│   │   ├── Item.tsx
+│   │   └── Outro.tsx
+│   └── components/
+│       ├── Sign.tsx
+│       ├── Caption.tsx
+│       ├── SafeArea.tsx
+│       └── ProgressBar.tsx
+├── scripts/
+│   ├── synthesize.ts
+│   └── timing.ts
+├── content/
+│   └── ep01-appearance-part1.json
+├── public/audio/{id}/
+└── out/
+```
+
+---
+
+## 10. 実装フェーズ
+
+**一度に全部作らないこと。** 各フェーズ終了時に動作確認できる状態にする。
+
+### Phase 1: 骨格
+- Remotion プロジェクト初期化（pnpm）
+- `theme.ts`, `schema.ts`, `SafeArea`, `ProgressBar`
+- ダミーテキストで Hook / Item×3 / Outro を固定尺で表示
+- **完了条件**: `pnpm remotion studio` で通しで見られる
+
+### Phase 2: ビジュアル確定
+- `<Sign>` の実装とアニメーション
+- タイポグラフィの適用、行数オーバー時の警告
+- **完了条件**: 静止画で見てサムネとして成立する
+
+### Phase 3: 音声
+- VOICEVOX ENGINE 起動確認
+- `scripts/synthesize.ts`（キャッシュ込み）
+- 動画に音声を乗せる
+- **完了条件**: ずんだもんが喋る mp4 が出る
+
+### Phase 4: タイミング自動化
+- `scripts/timing.ts`
+- `calculateMetadata` による尺算出
+- `<Caption>` の実装
+- **完了条件**: `content/*.json` の文言を1行足しても、尺と字幕が自動で追従する
+
+### Phase 5: 量産導線
+- `pnpm run build:episode -- ep02` の形で合成→レンダリングまで一気通貫
+- **完了条件**: 新しい JSON を1つ置くだけで mp4 が出る
+
+---
+
+## 11. 初回コンテンツ
+
+`content/ep01-appearance-part1.json` として以下を実装すること。
+`narration` はずんだもん口調、画面テキストは通常語。
+
+```
+id: ep01 / part: 1 / category: 見た目編
+
+hook（画面）:
+  「アラサー男性による」
+  「恋愛NG集 3選」
+  「見た目編 PART1」
+hook（読み上げ）:
+  「今日は、見た目でやりがちなNG行動を3つ挙げるのだ。」
+  「全部、直せるやつなのだ。」
+
+--- item 1 ---
+headline: 剃った"つもり"の髭
+sting:    その「剃ったつもり」が一番危ない
+fact:     ["あご下・フェイスライン・口の横", "鏡、正面からしか見てないでしょ"]
+action:   顔を横に向けて、光に当てて、指で触る
+stamp:    生やすなら整える。剃るなら剃り切る
+narration:
+  「1つ目、髭なのだ。今日ちゃんと剃ったのだ？」
+  「あご下、フェイスライン、口の横。鏡を正面からしか見てないから、剃り残すのだ。」
+  「顔を横に向けて、光に当てて、指で触ってみるのだ。ざらついたら剃り残しなのだ。」
+  「生やすなら整える。剃るなら剃り切る。中途半端が一番よくないのだ。」
+
+--- item 2 ---
+headline: 「今日は疲れたから」の1日
+sting:    その1日、自分だけが気づいてない
+fact:     ["体臭は自分の分だけ嗅覚が慣れる", "だから自己申告はアテにならない"]
+action:   疲れた日ほどシャワーだけでも浴びる
+stamp:    枕カバーと部屋着は週2で替える
+narration:
+  「2つ目、風呂を抜いた日なのだ。」
+  「体臭って、自分の分だけ鼻が慣れちゃうのだ。だから自己申告はアテにならないのだ。」
+  「疲れた日ほど、シャワーだけでも浴びるのだ。」
+  「あと枕カバーと部屋着は週2で替えるのだ。服に染みた匂いは、体を洗っても消えないのだ。」
+
+--- item 3 ---
+headline: 鼻毛、今出てます
+sting:    相手はあなたの顔を、あなたより長く見ている
+fact:     ["「風邪を引くから」は言い訳", "切るのは外に出てる分だけでいい"]
+action:   鼻毛カッターを、週1で使う
+stamp:    3ヶ月に1回では遅い
+narration:
+  「3つ目、鼻毛なのだ。今この瞬間、鼻の下を触ってみるのだ。」
+  「残念だけど、相手はあなたの顔を、あなたより長く見てるのだ。」
+  「風邪を引くから、は言い訳なのだ。切るのは外に出てる分だけでいいのだ。」
+  「鼻毛カッターは月イチじゃなくて週イチなのだ。」
+
+--- outro ---
+outro（画面）: 見た目は才能じゃない。確認の回数
+nextTeaser:   PART2は「服」編
+narration:
+  「見た目は才能じゃなくて、確認の回数なのだ。」
+  「次は服編なのだ。同じ後悔をしたくないなら、フォローしておくのだ。」
+```
+
+---
+
+## 12. ライセンス・クレジット（実装必須）
+
+### VOICEVOX
+- 動画の概要欄に **`VOICEVOX:ずんだもん`** のクレジットを必ず記載する
+- `content/*.json` から概要欄テキストを生成する `scripts/description.ts` を作り、クレジット行を必ず含めること
+- 収益化・キャラクター利用の可否は VOICEVOX 公式およびずんだもんの利用ガイドラインで最新版を確認すること（規約は更新されるため、実装時点で必ず参照）
+
+### Remotion
+- 個人利用は無償だが、法人・チーム規模によってはライセンス購入が必要
+- `README.md` にこの点を明記すること
+
+---
+
+## 13. 判断が必要な箇所（実装前に確認すること）
+
+- BGM を入れるか。入れる場合の音源（著作権フリー素材の選定が必要）
+- ずんだもんの立ち絵を画面に出すか（出す場合は別途キャラクター利用規約の確認が必要）
+- 効果音の有無
+- サムネイル画像を Remotion の `<Still>` で同時生成するか
+
+---
+
+## 14. やらないこと
+
+- 項目を3つより増やす
+- シーンごとに個別レイアウトを書く
+- フレーム数のハードコード
+- Whisper による字幕タイミング推定
+- 画面テキストと読み上げ文の共用（必ず分離する）

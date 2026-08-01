@@ -10,7 +10,8 @@
     "studio": "remotion studio",
     "render": "tsx scripts/render.ts",
     "validate": "tsx scripts/validate.ts",
-    "synthesize": "tsx scripts/synthesize.ts"
+    "synthesize": "tsx scripts/synthesize.ts",
+    "timing": "tsx scripts/timing.ts"
   },
   "dependencies": {
     "@remotion/cli": "4.0.503",

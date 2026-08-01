@@ -62,8 +62,6 @@ const main = async () => {
     process.exit(1);
   }
 
-  await checkEngine();
-
   const filePath = findContentFile(id);
   const raw = JSON.parse(readFileSync(filePath, "utf-8"));
   const episode = loadEpisode(raw);
@@ -82,6 +80,7 @@ const main = async () => {
   const nextManifest: Manifest = {};
   let synthCount = 0;
   let skipCount = 0;
+  let engineChecked = false;
 
   for (const { key, text } of lines) {
     const hash = hashLine(text, voice);
@@ -93,6 +92,12 @@ const main = async () => {
       console.log(`[${id}] ${key}: skip`);
       skipCount += 1;
       continue;
+    }
+
+    // 全キャッシュ済みの場合はエンジン無しでも通したいので、実際に合成が必要になった時点で確認する
+    if (!engineChecked) {
+      await checkEngine();
+      engineChecked = true;
     }
 
     const query = await fetchAudioQuery(text);

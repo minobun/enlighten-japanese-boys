@@ -38,6 +38,22 @@ export const bgmSchema = z.object({
   volume: z.number().default(0.1), // ナレーションを邪魔しない音量
 });
 
+// 立ち絵の表情1つ分。口パクさせない(1枚しか無い)場合は文字列、口パクさせる場合は
+// 口閉じ/口開きのペアで書く(docs/spec.md §13 / Issue #18)。ファイル名は public/character/ からの相対パス
+const characterPoseSchema = z.union([
+  z.string(),
+  z.object({ closed: z.string(), open: z.string() }),
+]);
+
+// 立ち絵設定(docs/spec.md §13 / Issue #18)。画像はオーナーが public/character/ に配置する。
+// troubled / angry は任意で、揃っていない場合は Character コンポーネント側でフォールバックする
+export const characterSchema = z.object({
+  normal: characterPoseSchema,
+  troubled: characterPoseSchema.optional(),
+  angry: characterPoseSchema.optional(),
+  scale: z.number().default(1),
+});
+
 export const episodeSchema = z.object({
   id: z.string(), // "ep01"
   part: z.number(), // 1
@@ -51,7 +67,10 @@ export const episodeSchema = z.object({
   voice: voiceSchema.optional(),
   credits: z.array(z.string()).optional(), // BGM/SE等の素材クレジット(docs/spec.md §12 / Issue #14)。あれば概要欄に追記
   bgm: bgmSchema.optional(),
+  character: characterSchema.optional(),
 });
 
 export type Item = z.infer<typeof itemSchema>;
 export type Episode = z.infer<typeof episodeSchema>;
+export type CharacterConfig = z.infer<typeof characterSchema>;
+export type CharacterPose = z.infer<typeof characterPoseSchema>;

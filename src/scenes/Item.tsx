@@ -1,11 +1,12 @@
 import { Sequence, useCurrentFrame } from "remotion";
 import { activeLineIndex, Caption } from "../components/Caption";
+import { Character } from "../components/Character";
 import { FadeIn } from "../components/FadeIn";
 import { Narration } from "../components/Narration";
 import { Sign } from "../components/Sign";
 import { checkFieldLines, formatOverflow, isOverflowing } from "../lineCount";
 import type { ItemLayout } from "../metadata";
-import type { Item as ItemProps } from "../schema";
+import type { CharacterConfig, Item as ItemProps } from "../schema";
 import { color, fontSize, label, maxLines, typography } from "../theme";
 
 // 宣告 / 事実 / 行動 / スタンプ各ブロックの開始・尺は calculateMetadata が narration の
@@ -21,7 +22,11 @@ const warnIfOverflowing = (field: string, inputLines: string[], role: keyof type
   }
 };
 
-type ItemComponentProps = ItemProps & { id: string; layout: ItemLayout };
+type ItemComponentProps = ItemProps & {
+  id: string;
+  layout: ItemLayout;
+  character: CharacterConfig | undefined;
+};
 
 // 全 Item 共通の内部構造(docs/spec.md §4.2): 宣告 → 事実 → 行動 → スタンプ
 export const Item: React.FC<ItemComponentProps> = ({
@@ -34,6 +39,7 @@ export const Item: React.FC<ItemComponentProps> = ({
   narration,
   id,
   layout,
+  character,
 }) => {
   const {
     declare: declareBlock,
@@ -89,6 +95,9 @@ export const Item: React.FC<ItemComponentProps> = ({
         {/* 標識は action の表示開始で prohibit → instruct に切り替わる(docs/spec.md §5.3) */}
         <Sign mode="prohibit" switchAt={actionBlock.from} size={SIGN_SIZE} />
       </div>
+
+      {/* 立ち絵の表情も標識と同じフレームで NG指摘→通常に切り替える(docs/spec.md §13 / Issue #18) */}
+      <Character character={character} switchAt={actionBlock.from} speaking={currentLine >= 0} />
 
       {/* 残り領域の中央にテキストを置く。ブロックが入れ替わっても標識の位置は動かない */}
       <div

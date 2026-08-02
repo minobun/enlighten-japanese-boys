@@ -3,6 +3,7 @@ import { Background } from "../components/Background";
 import { activeLineIndex, Caption } from "../components/Caption";
 import { Character } from "../components/Character";
 import { FadeIn } from "../components/FadeIn";
+import { Illustration } from "../components/Illustration";
 import { Narration } from "../components/Narration";
 import { Sign } from "../components/Sign";
 import { checkFieldLines, formatOverflow, isOverflowing } from "../lineCount";
@@ -38,6 +39,7 @@ export const Item: React.FC<ItemComponentProps> = ({
   action,
   stamp,
   narration,
+  illustration,
   id,
   layout,
   character,
@@ -119,6 +121,10 @@ export const Item: React.FC<ItemComponentProps> = ({
           paddingTop: 48,
         }}
       >
+        {/* itemごとのイラスト(あれば)。Item全体を通して出しっぱなしにし、下のキーワードタグは
+            ブロックごとに切り替わる(docs/spec.md 改善 / Issue #43フォローアップ) */}
+        <Illustration file={illustration} />
+
         <Sequence
           layout="none"
           from={declareBlock.from}

@@ -14,7 +14,8 @@ export const color = {
   // 背景の装飾用。文字のコントラストを保つため低不透明度に固定する(docs/spec.md 改善 / Issue #43)
   prohibitGlow: "rgba(213,32,42,0.22)",
   instructGlow: "rgba(46,123,224,0.22)",
-  dot: "rgba(242,240,234,0.05)",
+  prohibitParticle: "rgba(213,32,42,0.45)",
+  instructParticle: "rgba(46,123,224,0.45)",
 };
 
 export const fontSize = {

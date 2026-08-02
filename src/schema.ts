@@ -9,6 +9,10 @@ export const itemSchema = z.object({
   action: z.string(), // 今日やること(画面で最も強調される)
   stamp: z.string(), // 締めの一言
   narration: z.array(z.string()), // TTS に読ませる文(行単位)
+  // 中央に表示するitem専用イラスト(docs/spec.md 改善 / Issue #43フォローアップ)。
+  // public/illustrations/ からの相対パス。オーナーが用意するまでは未指定でよく、
+  // 未指定の場合は<Illustration>側で描画をスキップし、従来のテキスト表示のみになる
+  illustration: z.string().optional(),
 });
 
 // docs/spec.md §6.3。VOICEVOX パラメータをエピソード単位で上書きするための任意フィールド

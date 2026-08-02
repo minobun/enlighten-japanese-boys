@@ -20,6 +20,8 @@ export const fontSize = {
   fact: 56,
   action: 84,
   stamp: 52,
+  keyword: 40, // 中央のキーワードタグ専用(docs/spec.md 改善 / Issue #41)。読み上げ字幕を主役にするため、事実・締めは小さいタグ表示にする
+  keywordEmphasis: 56, // actionタグ専用。他のタグより大きくして「最も強調する」役割は保つ(docs/spec.md §4.2 / Issue #41)
   thumbnailTitle: 116, // サムネイル専用: 「恋愛NG集 3選」(docs/spec.md §13 / Issue #15)
   thumbnailSubtitle: 68, // サムネイル専用: 「{category} PART{part}」
 };
@@ -31,6 +33,8 @@ export const maxLines: Record<keyof typeof fontSize, number> = {
   fact: 2,
   action: 2,
   stamp: 1,
+  keyword: 1,
+  keywordEmphasis: 1,
   thumbnailTitle: 1,
   thumbnailSubtitle: 1,
 };
@@ -87,6 +91,12 @@ export const typography: Record<
   fact: { fontSize: fontSize.fact, fontFamily: fontFamily.jp, fontWeight: fontWeight.bold },
   action: { fontSize: fontSize.action, fontFamily: fontFamily.jp, fontWeight: fontWeight.black },
   stamp: { fontSize: fontSize.stamp, fontFamily: fontFamily.jp, fontWeight: fontWeight.bold },
+  keyword: { fontSize: fontSize.keyword, fontFamily: fontFamily.jp, fontWeight: fontWeight.bold },
+  keywordEmphasis: {
+    fontSize: fontSize.keywordEmphasis,
+    fontFamily: fontFamily.jp,
+    fontWeight: fontWeight.black,
+  },
   thumbnailTitle: {
     fontSize: fontSize.thumbnailTitle,
     fontFamily: fontFamily.jp,

@@ -1,4 +1,5 @@
 import { useCurrentFrame } from "remotion";
+import { Background } from "../components/Background";
 import { activeLineIndex, Caption } from "../components/Caption";
 import { Character } from "../components/Character";
 import { FadeIn } from "../components/FadeIn";
@@ -60,6 +61,8 @@ export const Outro: React.FC<OutroProps> = ({
         paddingTop: 96,
       }}
     >
+      {/* Outroは解決後の締めなので常に改善(青)アクセント(docs/spec.md 改善 / Issue #43) */}
+      <Background mode="instruct" />
       <Narration id={id} lines={layout.lines} />
       {currentLine >= 0 && (
         <Caption

@@ -17,3 +17,7 @@ public/se/*
 # 立ち絵画像(オーナーが用意する素材。README だけコミットする)
 public/character/*
 !public/character/README.md
+
+# item用イラスト(オーナーが用意する素材。README だけコミットする)
+public/illustrations/*
+!public/illustrations/README.md

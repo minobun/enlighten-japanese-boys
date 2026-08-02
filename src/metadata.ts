@@ -13,8 +13,9 @@ import type { TimingChunk } from "./timing";
 export const FPS = 30;
 
 // docs/spec.md §8 のパディング。秒で持ち、フレームへの変換は fps 経由で行う
-const SCENE_PADDING_SEC = 0.3; // シーン間
-const LINE_PADDING_SEC = 0.15; // 行間
+// Shorts のテンポ優先で切り詰めた値(docs/spec.md §8 / Issue #40)
+const SCENE_PADDING_SEC = 0.2; // シーン間
+const LINE_PADDING_SEC = 0.1; // 行間
 
 // wav が無い行のフォールバック(Studio で音声未生成でも通しで見られるようにする)
 const FALLBACK_LINE_SEC = 2;

@@ -118,7 +118,18 @@ export const Item: React.FC<ItemComponentProps> = ({
           <FadeIn>
             <div style={{ textAlign: "center" }}>
               <div style={{ ...typography.headline, color: color.paper }}>{headline}</div>
-              <div style={{ ...typography.sting, color: color.prohibit, marginTop: 16 }}>
+              {/* 下部の読み上げ字幕が同じ内容を全文で読むため、中央は短いキーワードタグに留める(docs/spec.md 改善 / Issue #41) */}
+              <div
+                style={{
+                  ...typography.keyword,
+                  color: color.prohibit,
+                  marginTop: 16,
+                  display: "inline-block",
+                  padding: "6px 20px",
+                  borderRadius: 999,
+                  border: `2px solid ${color.prohibit}`,
+                }}
+              >
                 {sting}
               </div>
             </div>
@@ -131,9 +142,19 @@ export const Item: React.FC<ItemComponentProps> = ({
           durationInFrames={factBlock.durationInFrames}
         >
           <FadeIn>
-            <div style={{ textAlign: "center" }}>
+            {/* 事実の全文は読み上げ字幕側が担うため、中央はキーワードタグの横並びに留める(docs/spec.md 改善 / Issue #41) */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}>
               {fact.map((line, index) => (
-                <div key={index} style={{ ...typography.fact, color: color.mute }}>
+                <div
+                  key={index}
+                  style={{
+                    ...typography.keyword,
+                    color: color.mute,
+                    padding: "6px 20px",
+                    borderRadius: 999,
+                    border: `2px solid ${color.hairline}`,
+                  }}
+                >
                   {line}
                 </div>
               ))}
@@ -147,11 +168,17 @@ export const Item: React.FC<ItemComponentProps> = ({
           durationInFrames={actionBlock.durationInFrames}
         >
           <FadeIn>
+            {/* actionは「今日やること」として最も強調するが、読み上げ字幕と同文になるため
+                全文パラグラフではなくキーワードタグで見せる(docs/spec.md §4.2 / Issue #41) */}
             <div
               style={{
-                ...typography.action,
+                ...typography.keywordEmphasis,
                 color: color.instruct,
                 textAlign: "center",
+                display: "inline-block",
+                padding: "16px 32px",
+                borderRadius: 999,
+                border: `3px solid ${color.instruct}`,
               }}
             >
               {action}
@@ -165,7 +192,18 @@ export const Item: React.FC<ItemComponentProps> = ({
           durationInFrames={stampBlock.durationInFrames}
         >
           <FadeIn>
-            <div style={{ ...typography.stamp, color: color.paper, textAlign: "center" }}>
+            {/* 締めの一言も読み上げ字幕と同文になるため、控えめなキーワードタグで見せる(Issue #41) */}
+            <div
+              style={{
+                ...typography.keyword,
+                color: color.paper,
+                textAlign: "center",
+                display: "inline-block",
+                padding: "6px 20px",
+                borderRadius: 999,
+                border: `2px solid ${color.hairline}`,
+              }}
+            >
               {stamp}
             </div>
           </FadeIn>

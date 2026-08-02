@@ -3,6 +3,10 @@ import type { LineLayout } from "../metadata";
 import { color, fontFamily, fontSize, fontWeight } from "../theme";
 import type { TimingChunk } from "../timing";
 
+// 字幕を主役として全シーン共通の位置・最大幅に固定する(docs/spec.md 改善 / Issue #41)。
+// 画面いっぱいに広げず中央へ寄せることで、キャラクター表示領域(左下)と重なりにくくする
+const CAPTION_MAX_WIDTH_PX = 860;
+
 type CaptionProps = {
   text: string; // 表示する narration 行のテキスト
   timing?: TimingChunk[]; // その行の timing.json(docs/spec.md §7)。未生成なら undefined
@@ -41,9 +45,11 @@ export const Caption: React.FC<CaptionProps> = ({ text, timing, startFrame }) =>
     <div
       style={{
         position: "absolute",
-        left: 0,
-        right: 0,
+        left: "50%",
         bottom: 0,
+        transform: "translateX(-50%)",
+        width: CAPTION_MAX_WIDTH_PX,
+        maxWidth: "100%",
         textAlign: "center",
         fontFamily: fontFamily.jp,
         fontWeight: fontWeight.bold,

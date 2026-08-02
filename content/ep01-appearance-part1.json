@@ -56,6 +56,9 @@
     "次は服編なのだ。フォローしておくのだ。"
   ],
   "nextTeaser": "PART2は「服」編",
+  "voice": {
+    "speedScale": 1.2
+  },
   "bgm": {
     "file": "main.mp3",
     "volume": 0.03

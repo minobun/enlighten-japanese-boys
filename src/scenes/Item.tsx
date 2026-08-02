@@ -1,4 +1,5 @@
 import { Sequence, useCurrentFrame } from "remotion";
+import { Background } from "../components/Background";
 import { activeLineIndex, Caption } from "../components/Caption";
 import { Character } from "../components/Character";
 import { FadeIn } from "../components/FadeIn";
@@ -68,6 +69,8 @@ export const Item: React.FC<ItemComponentProps> = ({
         alignItems: "center",
       }}
     >
+      {/* 背景アクセントも標識と同じフレームでNG(赤)→改善(青)に切り替える(docs/spec.md 改善 / Issue #43) */}
+      <Background mode="prohibit" switchAt={actionBlock.from} />
       <Narration id={id} lines={layout.lines} />
       {currentLine >= 0 && (
         <Caption
@@ -77,6 +80,7 @@ export const Item: React.FC<ItemComponentProps> = ({
         />
       )}
 
+      {/* Item番号はカード化し、単色背景に意図的な余白として見せる(docs/spec.md 改善 / Issue #43) */}
       <div
         style={{
           position: "absolute",
@@ -85,6 +89,9 @@ export const Item: React.FC<ItemComponentProps> = ({
           ...label,
           fontSize: 40,
           color: color.mute,
+          padding: "6px 18px",
+          borderRadius: 12,
+          border: `1px solid ${color.hairline}`,
         }}
       >
         {no < 10 ? `0${no}` : no}

@@ -1,4 +1,5 @@
 import { useCurrentFrame } from "remotion";
+import { Background } from "../components/Background";
 import { activeLineIndex, Caption } from "../components/Caption";
 import { Character } from "../components/Character";
 import { FadeIn } from "../components/FadeIn";
@@ -21,7 +22,8 @@ type HookProps = {
 };
 
 // docs/spec.md §4.2: 掴み。数字を大きく。
-// 背景は Episode.tsx 側で color.ground を敷いているので、ここではテキストのみ扱う
+// ベースの背景色は Episode.tsx 側で color.ground を敷いており、<Background> はその上に
+// 重ねる装飾(docs/spec.md 改善 / Issue #43)。
 // (この div は SafeArea の padding 済みコンテンツ領域を 100% で満たす通常フローの要素)。
 export const Hook: React.FC<HookProps> = ({ hook, hookNarration, id, layout, character }) => {
   // 開発中に文字数オーバーへ気づけるようにする(docs/spec.md §5.2、判定ロジックは lineCount.ts に共通化)
@@ -48,6 +50,8 @@ export const Hook: React.FC<HookProps> = ({ hook, hookNarration, id, layout, cha
         paddingTop: 64,
       }}
     >
+      {/* Hookは常に禁止(赤)アクセント。これから挙げるNGを予告する(docs/spec.md 改善 / Issue #43) */}
+      <Background mode="prohibit" />
       <Narration id={id} lines={layout.lines} />
       {currentLine >= 0 && (
         <Caption

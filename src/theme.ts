@@ -11,6 +11,10 @@ export const color = {
   prohibit: "#D5202A", // 禁止・NG
   instruct: "#2E7BE0", // 指示・OK
   hairline: "rgba(242,240,234,0.14)",
+  // 背景の装飾用。文字のコントラストを保つため低不透明度に固定する(docs/spec.md 改善 / Issue #43)
+  prohibitGlow: "rgba(213,32,42,0.22)",
+  instructGlow: "rgba(46,123,224,0.22)",
+  dot: "rgba(242,240,234,0.05)",
 };
 
 export const fontSize = {

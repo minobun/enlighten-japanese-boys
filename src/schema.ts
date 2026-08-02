@@ -38,6 +38,30 @@ export const bgmSchema = z.object({
   volume: z.number().default(0.1), // ナレーションを邪魔しない音量
 });
 
+// 口パク用の口レイヤー。坂本アヒル氏の PSD 立ち絵から、体(body)と同じキャンバスサイズで
+// 口レイヤーだけを PNG 書き出ししたものを想定する(同サイズなので重ねるだけで位置が合う)
+const characterMouthSchema = z.object({
+  closed: z.string(), // 口を閉じた口レイヤー
+  open: z.string(), // 口を開いた口レイヤー
+});
+
+// 立ち絵の表情1つ分。口パクさせない(1枚しか無い)場合は文字列、口パクさせる場合は
+// 口だけを抜いた body と口レイヤーのペアで書く(坂本アヒル式・docs/spec.md §13 / Issue #18)。
+// ファイル名はすべて public/character/ からの相対パス
+const characterPoseSchema = z.union([
+  z.string(),
+  z.object({ body: z.string(), mouth: characterMouthSchema.optional() }),
+]);
+
+// 立ち絵設定(docs/spec.md §13 / Issue #18)。画像はオーナーが public/character/ に配置する。
+// troubled / angry は任意で、揃っていない場合は Character コンポーネント側でフォールバックする
+export const characterSchema = z.object({
+  normal: characterPoseSchema,
+  troubled: characterPoseSchema.optional(),
+  angry: characterPoseSchema.optional(),
+  scale: z.number().default(1),
+});
+
 export const episodeSchema = z.object({
   id: z.string(), // "ep01"
   part: z.number(), // 1
@@ -51,7 +75,10 @@ export const episodeSchema = z.object({
   voice: voiceSchema.optional(),
   credits: z.array(z.string()).optional(), // BGM/SE等の素材クレジット(docs/spec.md §12 / Issue #14)。あれば概要欄に追記
   bgm: bgmSchema.optional(),
+  character: characterSchema.optional(),
 });
 
 export type Item = z.infer<typeof itemSchema>;
 export type Episode = z.infer<typeof episodeSchema>;
+export type CharacterConfig = z.infer<typeof characterSchema>;
+export type CharacterPose = z.infer<typeof characterPoseSchema>;

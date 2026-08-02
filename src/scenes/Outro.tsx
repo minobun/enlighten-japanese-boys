@@ -1,9 +1,11 @@
 import { useCurrentFrame } from "remotion";
 import { activeLineIndex, Caption } from "../components/Caption";
+import { Character } from "../components/Character";
 import { FadeIn } from "../components/FadeIn";
 import { Narration } from "../components/Narration";
 import { checkFieldLines, formatOverflow, isOverflowing } from "../lineCount";
 import type { SceneLayout } from "../metadata";
+import type { CharacterConfig } from "../schema";
 import { color, fontSize, maxLines, typography } from "../theme";
 
 type OutroProps = {
@@ -12,12 +14,20 @@ type OutroProps = {
   nextTeaser: string;
   id: string;
   layout: SceneLayout;
+  character: CharacterConfig | undefined;
 };
 
 // docs/spec.md §4.2: 締め + 次回予告
 // outro は headline と同じサイズ、nextTeaser は stamp と同じサイズで表示するため、
 // 行数チェックもそれぞれの役割の maxLines を流用する。
-export const Outro: React.FC<OutroProps> = ({ outro, outroNarration, nextTeaser, id, layout }) => {
+export const Outro: React.FC<OutroProps> = ({
+  outro,
+  outroNarration,
+  nextTeaser,
+  id,
+  layout,
+  character,
+}) => {
   const outroCheck = checkFieldLines("outro", outro, fontSize.headline, maxLines.headline);
   if (isOverflowing(outroCheck)) {
     console.warn(formatOverflow(outroCheck));
@@ -55,6 +65,9 @@ export const Outro: React.FC<OutroProps> = ({ outro, outroNarration, nextTeaser,
           startFrame={layout.lines[currentLine].from}
         />
       )}
+
+      {/* Outro でも常に通常表情(switchAt なし。docs/spec.md §13 / Issue #18) */}
+      <Character character={character} speaking={currentLine >= 0} />
 
       <FadeIn>
         <div style={{ textAlign: "center" }}>

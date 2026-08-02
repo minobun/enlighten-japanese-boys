@@ -34,6 +34,7 @@ export const Episode: React.FC<Props> = (props) => {
     debugSafeArea,
     layout,
     bgm,
+    character,
   } = props;
   const { fps } = useVideoConfig();
   const resolved = layout ?? fallbackLayout(props, fps);
@@ -48,7 +49,13 @@ export const Episode: React.FC<Props> = (props) => {
           from={resolved.hook.from}
           durationInFrames={resolved.hook.durationInFrames}
         >
-          <Hook hook={hook} hookNarration={hookNarration} id={id} layout={resolved.hook} />
+          <Hook
+            hook={hook}
+            hookNarration={hookNarration}
+            id={id}
+            layout={resolved.hook}
+            character={character}
+          />
         </Sequence>
         {items.map((item, index) => {
           const itemLayout = resolved.items[index];
@@ -59,7 +66,7 @@ export const Episode: React.FC<Props> = (props) => {
               from={itemLayout.from}
               durationInFrames={itemLayout.durationInFrames}
             >
-              <Item {...item} id={id} layout={itemLayout} />
+              <Item {...item} id={id} layout={itemLayout} character={character} />
             </Sequence>
           );
         })}
@@ -74,6 +81,7 @@ export const Episode: React.FC<Props> = (props) => {
             nextTeaser={nextTeaser}
             id={id}
             layout={resolved.outro}
+            character={character}
           />
         </Sequence>
       </SafeArea>

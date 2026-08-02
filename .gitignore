@@ -13,3 +13,7 @@ public/bgm/*
 # SE 音源(オーナーが用意する素材。README だけコミットする)
 public/se/*
 !public/se/README.md
+
+# 立ち絵画像(オーナーが用意する素材。README だけコミットする)
+public/character/*
+!public/character/README.md

@@ -36,7 +36,7 @@ const staticFileExists = (path: string): boolean =>
 // フルキャンバスで PNG 書き出し)なので、同じボックスに重ねるだけで位置が合う
 const layerStyle = (opacity: number): React.CSSProperties => ({
   position: "absolute",
-  left: 0,
+  right: 0,
   bottom: 0,
   height: "100%",
   width: "auto",
@@ -117,7 +117,7 @@ export const Character: React.FC<CharacterProps> = ({
     <div
       style={{
         position: "absolute",
-        left: 0,
+        right: 0,
         bottom: characterTheme.bottomOffsetPx,
         height: characterTheme.baseHeightPx * character.scale,
         opacity: appear,

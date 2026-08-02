@@ -50,8 +50,8 @@ export const safeArea = {
 // character.scale(episode単位)はこの基準高さへの倍率
 export const character = {
   baseHeightPx: 400,
-  // 左下配置。左は <SafeArea> の padding で既に確保済み。下は 260px セーフエリアの内側かつ
-  // <Caption> の字幕テキストと重ならない余白を確保する
+  // 右下配置(オーナー確認により左から右へ変更)。右は <SafeArea> の padding で既に
+  // 確保済み。下は 260px セーフエリアの内側かつ <Caption> の字幕テキストと重ならない余白を確保する
   bottomOffsetPx: 190,
 };
 

@@ -28,45 +28,50 @@ type CharacterProps = {
   speaking: boolean;
 };
 
-const isTwoFramePose = (pose: CharacterPose): pose is { closed: string; open: string } =>
-  typeof pose !== "string";
+const poseBodyFile = (pose: CharacterPose): string =>
+  typeof pose === "string" ? pose : pose.body;
 
-const poseFile = (pose: CharacterPose, mouthOpen: boolean): string =>
-  isTwoFramePose(pose) ? (mouthOpen ? pose.open : pose.closed) : pose;
+const poseMouth = (pose: CharacterPose): { closed: string; open: string } | undefined =>
+  typeof pose === "string" ? undefined : pose.mouth;
 
 const staticFileExists = (path: string): boolean =>
   getStaticFiles().some((file) => file.name === path);
 
-// 立ち絵素材はオーナーが public/character/ に用意するものなので、置かれていなければ
-// 警告ログを出すだけでレンダリングを続行する(クラッシュさせない)
+// body と口レイヤーは同じキャンバスサイズで書き出されている前提(坂本アヒル氏の PSD から
+// フルキャンバスで PNG 書き出し)なので、同じボックスに重ねるだけで位置が合う
+const layerStyle = (opacity: number): React.CSSProperties => ({
+  position: "absolute",
+  left: 0,
+  bottom: 0,
+  height: "100%",
+  width: "auto",
+  opacity,
+});
+
+// 1表情ぶんのレイヤー(body の上に口レイヤーを重ねる)。素材はオーナーが public/character/ に
+// 用意するものなので、置かれていなければ描画をスキップする(クラッシュさせない)
 const CharacterLayer: React.FC<{
   pose: CharacterPose;
   opacity: number;
   speaking: boolean;
   frame: number;
 }> = ({ pose, opacity, speaking, frame }) => {
-  const mouthOpen =
-    isTwoFramePose(pose) &&
-    speaking &&
-    Math.floor(frame / MOUTH_TOGGLE_INTERVAL_FRAMES) % 2 === 1;
-  const path = `character/${poseFile(pose, mouthOpen)}`;
-
-  if (!staticFileExists(path)) {
+  const bodyPath = `character/${poseBodyFile(pose)}`;
+  if (!staticFileExists(bodyPath)) {
     return null;
   }
 
+  const mouth = poseMouth(pose);
+  const mouthOpen = speaking && Math.floor(frame / MOUTH_TOGGLE_INTERVAL_FRAMES) % 2 === 1;
+  const mouthPath = mouth ? `character/${mouthOpen ? mouth.open : mouth.closed}` : undefined;
+
   return (
-    <Img
-      src={staticFile(path)}
-      style={{
-        position: "absolute",
-        left: 0,
-        bottom: 0,
-        height: "100%",
-        width: "auto",
-        opacity,
-      }}
-    />
+    <>
+      <Img src={staticFile(bodyPath)} style={layerStyle(opacity)} />
+      {mouthPath !== undefined && staticFileExists(mouthPath) && (
+        <Img src={staticFile(mouthPath)} style={layerStyle(opacity)} />
+      )}
+    </>
   );
 };
 
@@ -84,8 +89,7 @@ export const Character: React.FC<CharacterProps> = ({
     return null;
   }
 
-  const normalBaseFile = poseFile(character.normal, false);
-  const normalPath = `character/${normalBaseFile}`;
+  const normalPath = `character/${poseBodyFile(character.normal)}`;
   if (!staticFileExists(normalPath)) {
     console.warn(
       `立ち絵ファイルが見つからないのだ: public/${normalPath}\npublic/character/README.md を確認して配置するのだ`,
@@ -126,7 +130,12 @@ export const Character: React.FC<CharacterProps> = ({
       }}
     >
       {switchProgress < 1 && (
-        <CharacterLayer pose={fromPose} opacity={1 - switchProgress} speaking={speaking} frame={frame} />
+        <CharacterLayer
+          pose={fromPose}
+          opacity={1 - switchProgress}
+          speaking={speaking}
+          frame={frame}
+        />
       )}
       <CharacterLayer pose={toPose} opacity={switchProgress} speaking={speaking} frame={frame} />
     </div>

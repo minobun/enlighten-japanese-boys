@@ -38,11 +38,19 @@ export const bgmSchema = z.object({
   volume: z.number().default(0.1), // ナレーションを邪魔しない音量
 });
 
+// 口パク用の口レイヤー。坂本アヒル氏の PSD 立ち絵から、体(body)と同じキャンバスサイズで
+// 口レイヤーだけを PNG 書き出ししたものを想定する(同サイズなので重ねるだけで位置が合う)
+const characterMouthSchema = z.object({
+  closed: z.string(), // 口を閉じた口レイヤー
+  open: z.string(), // 口を開いた口レイヤー
+});
+
 // 立ち絵の表情1つ分。口パクさせない(1枚しか無い)場合は文字列、口パクさせる場合は
-// 口閉じ/口開きのペアで書く(docs/spec.md §13 / Issue #18)。ファイル名は public/character/ からの相対パス
+// 口だけを抜いた body と口レイヤーのペアで書く(坂本アヒル式・docs/spec.md §13 / Issue #18)。
+// ファイル名はすべて public/character/ からの相対パス
 const characterPoseSchema = z.union([
   z.string(),
-  z.object({ closed: z.string(), open: z.string() }),
+  z.object({ body: z.string(), mouth: characterMouthSchema.optional() }),
 ]);
 
 // 立ち絵設定(docs/spec.md §13 / Issue #18)。画像はオーナーが public/character/ に配置する。

@@ -13,8 +13,10 @@ import type { TimingChunk } from "./timing";
 export const FPS = 30;
 
 // docs/spec.md §8 のパディング。秒で持ち、フレームへの変換は fps 経由で行う
-const SCENE_PADDING_SEC = 0.3; // シーン間
-const LINE_PADDING_SEC = 0.15; // 行間
+// Issue #40で一度詰めたが、「ずんだもんが言い終わる前に次のブロック/シーンに
+// 切り替わって見える」というオーナー指摘を受けて広げ直した。尺が伸びるのは許容
+const SCENE_PADDING_SEC = 0.45; // シーン間(Hook→Item、Item→Item、Item→Outro)
+const LINE_PADDING_SEC = 0.3; // 行間(宣告→事実→行動→スタンプの各ブロック切り替え)
 
 // wav が無い行のフォールバック(Studio で音声未生成でも通しで見られるようにする)
 const FALLBACK_LINE_SEC = 2;

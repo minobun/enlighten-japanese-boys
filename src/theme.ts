@@ -42,6 +42,9 @@ export const safeArea = {
   left: 60,
 };
 
+// SE(効果音)のデフォルト音量(docs/spec.md §13 / Issue #17)。ナレーションを邪魔しない程度
+export const seVolume = 0.3;
+
 // docs/spec.md §5.2: @remotion/google-fonts から読み込む。
 // weight は用途ごとに typography 側で使い分けるため、ここでは family 名だけを保持する。
 const { fontFamily: notoSansJPFamily } = loadNotoSansJP("normal", {

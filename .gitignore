@@ -9,3 +9,7 @@ public/audio
 # BGM 音源(オーナーが用意する素材。README だけコミットする)
 public/bgm/*
 !public/bgm/README.md
+
+# SE 音源(オーナーが用意する素材。README だけコミットする)
+public/se/*
+!public/se/README.md

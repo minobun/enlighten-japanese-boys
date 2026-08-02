@@ -2,13 +2,15 @@ import { AbsoluteFill, Sequence, useVideoConfig } from "remotion";
 import { Bgm } from "./components/Bgm";
 import { ProgressBar } from "./components/ProgressBar";
 import { SafeArea } from "./components/SafeArea";
+import { Se } from "./components/Se";
 import type { EpisodeLayout } from "./metadata";
 import { fallbackLayout } from "./metadata";
 import type { Episode as EpisodeContent } from "./schema";
 import { Hook } from "./scenes/Hook";
 import { Item } from "./scenes/Item";
 import { Outro } from "./scenes/Outro";
-import { color } from "./theme";
+import { buildSeCues } from "./se";
+import { color, seVolume } from "./theme";
 
 type Props = EpisodeContent & {
   debugSafeArea: boolean;
@@ -39,6 +41,7 @@ export const Episode: React.FC<Props> = (props) => {
   return (
     <AbsoluteFill style={{ backgroundColor: color.ground }}>
       {bgm && <Bgm bgm={bgm} durationInFrames={resolved.durationInFrames} fps={fps} />}
+      <Se cues={buildSeCues(resolved)} volume={seVolume} />
       <SafeArea debug={debugSafeArea}>
         <Sequence
           layout="none"

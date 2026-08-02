@@ -76,6 +76,6 @@
       "body": "angry_body.png",
       "mouth": { "closed": "mouth_closed.png", "open": "mouth_open.png" }
     },
-    "scale": 0.7
+    "scale": 1.4
   }
 }

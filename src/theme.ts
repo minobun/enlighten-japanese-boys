@@ -46,6 +46,15 @@ export const safeArea = {
   left: 60,
 };
 
+// 立ち絵の基準サイズ・配置(docs/spec.md §13 / Issue #18, #42)。
+// character.scale(episode単位)はこの基準高さへの倍率
+export const character = {
+  baseHeightPx: 400,
+  // 左下配置。左は <SafeArea> の padding で既に確保済み。下は 260px セーフエリアの内側かつ
+  // <Caption> の字幕テキストと重ならない余白を確保する
+  bottomOffsetPx: 190,
+};
+
 // SE(効果音)のデフォルト音量(docs/spec.md §13 / Issue #17)。ナレーションを邪魔しない程度
 export const seVolume = 0.3;
 

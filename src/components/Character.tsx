@@ -1,5 +1,6 @@
 import { getStaticFiles, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
 import type { CharacterConfig, CharacterPose } from "../schema";
+import { character as characterTheme } from "../theme";
 
 // docs/spec.md §5.4: 登場は「フェード+4px上方向スライド」に統一する(<Sign>以外の例外は無い)
 const APPEAR_TRANSITION_FRAMES = 6;
@@ -11,12 +12,6 @@ const MOUTH_TOGGLE_INTERVAL_FRAMES = 6;
 // 喋っている間だけ乗せる、上下2pxのアイドル揺れ(sin波、spring不要)
 const IDLE_BOB_PERIOD_FRAMES = 50;
 const IDLE_BOB_AMPLITUDE_PX = 2;
-
-// 基準の高さ。character.scale で調整する
-const CHARACTER_HEIGHT_PX = 400;
-// 左下配置。左は <SafeArea> の padding で既に確保済み。下は 260px セーフエリアの内側かつ
-// <Caption> の字幕テキスト(最大2行程度)と重ならない余白を確保する
-const BOTTOM_OFFSET_PX = 190;
 
 type CharacterProps = {
   character: CharacterConfig | undefined;
@@ -123,8 +118,8 @@ export const Character: React.FC<CharacterProps> = ({
       style={{
         position: "absolute",
         left: 0,
-        bottom: BOTTOM_OFFSET_PX,
-        height: CHARACTER_HEIGHT_PX * character.scale,
+        bottom: characterTheme.bottomOffsetPx,
+        height: characterTheme.baseHeightPx * character.scale,
         opacity: appear,
         transform: `translateY(${appearSlide + idleBob}px)`,
       }}

@@ -99,15 +99,17 @@ export const Item: React.FC<ItemComponentProps> = ({
       {/* 立ち絵の表情も標識と同じフレームで NG指摘→通常に切り替える(docs/spec.md §13 / Issue #18) */}
       <Character character={character} switchAt={actionBlock.from} speaking={currentLine >= 0} />
 
-      {/* 残り領域の中央にテキストを置く。ブロックが入れ替わっても標識の位置は動かない */}
+      {/* テキストは標識の直下(上寄せ)に置く。ブロックが入れ替わっても標識の位置は動かない。
+          下半分は立ち絵と読み上げ字幕専用の領域として空けておく(docs/spec.md 改善 / Issue #42) */}
       <div
         style={{
           flex: 1,
           width: "100%",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "center",
+          justifyContent: "flex-start",
           alignItems: "center",
+          paddingTop: 48,
         }}
       >
         <Sequence

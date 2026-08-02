@@ -53,8 +53,11 @@ export const Outro: React.FC<OutroProps> = ({
         position: "relative",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
+        // 締めの文言は上寄せにし、下半分を立ち絵と読み上げ字幕専用の領域として空ける
+        // (docs/spec.md 改善 / Issue #42)
+        justifyContent: "flex-start",
         alignItems: "center",
+        paddingTop: 96,
       }}
     >
       <Narration id={id} lines={layout.lines} />

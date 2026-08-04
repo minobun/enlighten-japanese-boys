@@ -25,8 +25,6 @@ export const fontSize = {
   fact: 56,
   action: 84,
   stamp: 52,
-  keyword: 40, // 中央のキーワードタグ専用(docs/spec.md 改善 / Issue #41)。読み上げ字幕を主役にするため、事実・締めは小さいタグ表示にする
-  keywordEmphasis: 56, // actionタグ専用。他のタグより大きくして「最も強調する」役割は保つ(docs/spec.md §4.2 / Issue #41)
   thumbnailTitle: 116, // サムネイル専用: 「恋愛NG集 3選」(docs/spec.md §13 / Issue #15)
   thumbnailSubtitle: 68, // サムネイル専用: 「{category} PART{part}」
 };
@@ -38,8 +36,6 @@ export const maxLines: Record<keyof typeof fontSize, number> = {
   fact: 2,
   action: 2,
   stamp: 1,
-  keyword: 1,
-  keywordEmphasis: 1,
   thumbnailTitle: 1,
   thumbnailSubtitle: 1,
 };
@@ -58,6 +54,8 @@ export const character = {
   // 右下配置(オーナー確認により左から右へ変更)。右は <SafeArea> の padding で既に
   // 確保済み。下は 260px セーフエリアの内側かつ <Caption> の字幕テキストと重ならない余白を確保する
   bottomOffsetPx: 190,
+  // 中央配置(まとめ)用。中央は全幅の読み上げ字幕と重なるため、右下配置より高い位置に置く
+  centerBottomOffsetPx: 280,
 };
 
 // itemイラストの表示サイズ・配置(docs/spec.md 改善 / Issue #43フォローアップ)。
@@ -68,10 +66,6 @@ export const illustration = {
   // 右下の立ち絵(character.baseHeightPx * scale)と横に並べるため、幅は使用可能幅の左半分強に留める
   maxWidthPx: 560,
 };
-
-// ブロックごとに入れ替わるキーワードタグの表示領域の高さ。ここを固定しておくと、
-// 宣告(見出し+タグ2行)と行動(タグ1〜2行)でタグの高さが変わっても下のイラストが動かない
-export const keywordRowHeightPx = 210;
 
 // SE(効果音)のデフォルト音量(docs/spec.md §13 / Issue #17)。ナレーションを邪魔しない程度
 export const seVolume = 0.3;
@@ -118,12 +112,6 @@ export const typography: Record<
   fact: { fontSize: fontSize.fact, fontFamily: fontFamily.jp, fontWeight: fontWeight.bold },
   action: { fontSize: fontSize.action, fontFamily: fontFamily.jp, fontWeight: fontWeight.black },
   stamp: { fontSize: fontSize.stamp, fontFamily: fontFamily.jp, fontWeight: fontWeight.bold },
-  keyword: { fontSize: fontSize.keyword, fontFamily: fontFamily.jp, fontWeight: fontWeight.bold },
-  keywordEmphasis: {
-    fontSize: fontSize.keywordEmphasis,
-    fontFamily: fontFamily.jp,
-    fontWeight: fontWeight.black,
-  },
   thumbnailTitle: {
     fontSize: fontSize.thumbnailTitle,
     fontFamily: fontFamily.jp,

@@ -5,7 +5,7 @@
   "hook": [
     "モテない男の",
     "見た目NG行動",
-    "3選"
+    "3選 Part1"
   ],
   "hookNarration": [
     "モテない男がやりがちな、見た目のNG行動を3つ紹介するのだ。どれも今日から直せるのだ。"
@@ -14,10 +14,10 @@
     {
       "no": 1,
       "headline": "ヒゲをテキトーに剃る",
-      "illustration": "item_001.png",
-      "sting": "剃ったつもりが、一番だらしなく見える",
-      "action": "顔を横に向け、光と指で確認する",
-      "stamp": "剃るなら、最後まで剃り切る",
+      "illustration": {
+        "prohibit": "item_001.png",
+        "instruct": "item_002.png"
+      },
       "narration": [
         "1つ目、ヒゲをテキトーに剃ることなのだ。",
         "剃り残しがあると、細かいところを気にしない、だらしない人に見えるのだ。",
@@ -28,10 +28,10 @@
     {
       "no": 2,
       "headline": "疲れた日に風呂を飛ばす",
-      "illustration": "item_002.png",
-      "sting": "自分が平気でも、相手は近づけない",
-      "action": "疲れた日ほどシャワーを浴びる",
-      "stamp": "近づける清潔感をつくる",
+      "illustration": {
+        "prohibit": "item_003.png",
+        "instruct": "item_004.png"
+      },
       "narration": [
         "2つ目、疲れた日に風呂を飛ばすことなのだ。",
         "自分の匂いには鼻が慣れるから、自分が平気でも相手は平気とは限らないのだ。",
@@ -42,10 +42,10 @@
     {
       "no": 3,
       "headline": "鼻毛を見ていない",
-      "illustration": "item_003.png",
-      "sting": "年を取るほど、確認しないと目立つ",
-      "action": "鏡で確認して、週1で整える",
-      "stamp": "見えないつもりが、一番危ない",
+      "illustration": {
+        "prohibit": "item_005.png",
+        "instruct": "item_006.png"
+      },
       "narration": [
         "3つ目、鼻毛を見ていないことなのだ。",
         "年を取ると鼻毛は伸びやすくなるから、昔と同じ感覚ではダメなのだ。",
@@ -54,22 +54,22 @@
       ]
     }
   ],
-  "outro": [
-    "モテない原因は、才能より確認不足"
-  ],
   "outroNarration": [
-    "見た目で損する原因は、顔の才能より確認不足なのだ。昔の僕みたいになるな。",
-    "次は服編なのだ。フォローしておくのだ。"
+    "見た目で損する原因は、顔の才能より確認不足なのだ。昔の僕みたいにならないことなのだ。",
+    "次はPart2なのだ。フォローしておくのだ。"
   ],
-  "nextTeaser": "PART2は「服」編",
+  "nextTeaser": "見た目編Part2に続く",
   "voice": {
-    "speedScale": 1.25
+    "speedScale": 1.8
   },
   "bgm": {
     "file": "main.mp3",
     "volume": 0.03
   },
   "character": {
+    "enabled": [
+      "outro"
+    ],
     "normal": {
       "body": "normal_body.png",
       "mouth": {

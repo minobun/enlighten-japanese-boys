@@ -12,12 +12,14 @@ const illustrationSchema = z.union([
 export const itemSchema = z.object({
   no: z.number(), // 1 | 2 | 3
   headline: z.string(), // 項目名(例: 剃った"つもり"の髭)
-  sting: z.string(), // 刺す一言(例: その「剃ったつもり」が一番危ないのだ)
+  // sting / action / stamp は画面には出さず(読み上げ字幕と同じ内容になるため)、
+  // 台本メモとして残せるように任意フィールドにしてある(オーナー判断)
+  sting: z.string().optional(), // 刺す一言(例: その「剃ったつもり」が一番危ないのだ)
   // 相手側の事実(1〜2行)。中央に出すとイラスト・キーワードタグと情報量が競合するため任意にした
   // (オーナー判断)。省略した場合は画面に出さず、事実ブロックの尺・標識の切り替わりはそのまま
   fact: z.array(z.string()).optional(),
-  action: z.string(), // 今日やること(画面で最も強調される)
-  stamp: z.string(), // 締めの一言
+  action: z.string().optional(), // 今日やること
+  stamp: z.string().optional(), // 締めの一言
   narration: z.array(z.string()), // TTS に読ませる文(行単位)
   // 中央に表示するitem専用イラスト(docs/spec.md 改善 / Issue #43フォローアップ)。
   // オーナーが用意するまでは未指定でよく、未指定の場合は<Illustration>側で描画を
@@ -71,8 +73,9 @@ const characterPoseSchema = z.union([
 // troubled / angry は任意で、揃っていない場合は Character コンポーネント側でフォールバックする
 export const characterSchema = z.object({
   // 立ち絵を出すかどうか。素材の設定を消さずにオン/オフを切り替えられるようにするためのフラグで、
-  // 既定は「出さない」(オーナー判断)。出したいエピソードだけ "enabled": true を書く
-  enabled: z.boolean().default(false),
+  // 既定は「出さない」(オーナー判断)。
+  // true / false で全シーン一括、シーン名の配列で出すシーンだけを選ぶ(例: ["outro"])
+  enabled: z.union([z.boolean(), z.array(z.enum(["hook", "item", "outro"]))]).default(false),
   normal: characterPoseSchema,
   troubled: characterPoseSchema.optional(),
   angry: characterPoseSchema.optional(),
@@ -86,7 +89,7 @@ export const episodeSchema = z.object({
   hook: z.array(z.string()), // フックの画面文言
   hookNarration: z.array(z.string()), // フックの読み上げ文(TTS 専用。docs/spec.md §6.4)
   items: z.array(itemSchema).length(3),
-  outro: z.array(z.string()), // 締めの画面文言
+  outro: z.array(z.string()).optional(), // 締めの画面文言(省略時は次回予告と立ち絵だけになる)
   outroNarration: z.array(z.string()), // 締めの読み上げ文(TTS 専用)
   // まとめ(Outro)に出すイラスト。item と同じく public/illustrations/ からの相対パス。
   // Outro は標識の切り替えが無いので1枚だけ(未指定ならイラストなしで描画する)
@@ -101,5 +104,6 @@ export const episodeSchema = z.object({
 export type Item = z.infer<typeof itemSchema>;
 export type Episode = z.infer<typeof episodeSchema>;
 export type CharacterConfig = z.infer<typeof characterSchema>;
+export type SceneName = "hook" | "item" | "outro";
 export type IllustrationConfig = z.infer<typeof illustrationSchema>;
 export type CharacterPose = z.infer<typeof characterPoseSchema>;

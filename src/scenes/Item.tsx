@@ -1,7 +1,7 @@
-import { Sequence, useCurrentFrame } from "remotion";
+import { useCurrentFrame } from "remotion";
 import { Background } from "../components/Background";
 import { activeLineIndex, Caption } from "../components/Caption";
-import { Character } from "../components/Character";
+import { Character, characterVisibleIn } from "../components/Character";
 import { FadeIn } from "../components/FadeIn";
 import { Illustration } from "../components/Illustration";
 import { Narration } from "../components/Narration";
@@ -9,7 +9,7 @@ import { Sign } from "../components/Sign";
 import { checkFieldLines, formatOverflow, isOverflowing } from "../lineCount";
 import type { ItemLayout } from "../metadata";
 import type { CharacterConfig, Item as ItemProps } from "../schema";
-import { color, fontSize, keywordRowHeightPx, label, maxLines, typography } from "../theme";
+import { color, fontSize, label, maxLines, typography } from "../theme";
 
 // 宣告 / 事実 / 行動 / スタンプ各ブロックの開始・尺は calculateMetadata が narration の
 // 音声実長から算出する(docs/spec.md §8)。このファイルでフレーム数を決めないこと。
@@ -30,34 +30,22 @@ type ItemComponentProps = ItemProps & {
   character: CharacterConfig | undefined;
 };
 
-// 全 Item 共通の内部構造(docs/spec.md §4.2): 宣告 → 事実 → 行動 → スタンプ
+// 全 Item 共通の内部構造(docs/spec.md §4.2): 宣告 → 事実 → 行動 → スタンプ。
+// 画面に出すのは見出しとイラストだけで、sting / fact / action / stamp の文言は
+// 読み上げ字幕(<Caption>)と同じ内容になるため中央には出さない(オーナー判断)。
+// ブロックの区切りは「標識・背景・立ち絵・イラストがどのフレームで切り替わるか」にだけ使う。
 export const Item: React.FC<ItemComponentProps> = ({
   no,
   headline,
-  sting,
-  fact,
-  action,
-  stamp,
   narration,
   illustration,
   id,
   layout,
   character,
 }) => {
-  const {
-    declare: declareBlock,
-    fact: factBlock,
-    action: actionBlock,
-    stamp: stampBlock,
-  } = layout.blocks;
+  const { action: actionBlock } = layout.blocks;
 
   warnIfOverflowing(`items[${no}].headline`, [headline], "headline");
-  warnIfOverflowing(`items[${no}].sting`, [sting], "sting");
-  if (fact) {
-    warnIfOverflowing(`items[${no}].fact`, fact, "fact");
-  }
-  warnIfOverflowing(`items[${no}].action`, [action], "action");
-  warnIfOverflowing(`items[${no}].stamp`, [stamp], "stamp");
 
   const frame = useCurrentFrame();
   const currentLine = activeLineIndex(frame, layout.lines);
@@ -108,10 +96,16 @@ export const Item: React.FC<ItemComponentProps> = ({
       </div>
 
       {/* 立ち絵の表情も標識と同じフレームで NG指摘→通常に切り替える(docs/spec.md §13 / Issue #18) */}
-      <Character character={character} switchAt={actionBlock.from} speaking={currentLine >= 0} />
+      <Character
+        character={character}
+        scene="item"
+        switchAt={actionBlock.from}
+        speaking={currentLine >= 0}
+      />
 
-      {/* テキストは標識の直下(上寄せ)に置く。ブロックが入れ替わっても標識の位置は動かない。
-          下半分は立ち絵と読み上げ字幕専用の領域として空けておく(docs/spec.md 改善 / Issue #42) */}
+      {/* 見出しとイラストは標識の直下(上寄せ)に置く。どちらも Item を通して出しっぱなしなので、
+          ブロックが入れ替わっても画面は動かない。下半分は立ち絵と読み上げ字幕専用の領域として
+          空けておく(docs/spec.md 改善 / Issue #42) */}
       <div
         style={{
           flex: 1,
@@ -123,134 +117,18 @@ export const Item: React.FC<ItemComponentProps> = ({
           paddingTop: 48,
         }}
       >
-        {/* キーワードタグの領域。高さを固定して、ブロックが入れ替わってもタグと下のイラストが
-            上下に動かないようにする(タグの中身だけが差し替わる) */}
-        <div
-          style={{
-            height: keywordRowHeightPx,
-            width: "100%",
-            flexShrink: 0,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "flex-start",
-          }}
-        >
-          {/* fact を出さないときは宣告のタグを事実ブロックの間も出したままにする。
-              ずんだもんが理由を喋っている間、画面から NG のキーワードが消えないようにするため */}
-          <Sequence
-            layout="none"
-            from={declareBlock.from}
-            durationInFrames={declareBlock.durationInFrames + (fact ? 0 : factBlock.durationInFrames)}
-          >
-            <FadeIn>
-              <div style={{ textAlign: "center" }}>
-                <div style={{ ...typography.headline, color: color.paper }}>{headline}</div>
-                {/* 下部の読み上げ字幕が同じ内容を全文で読むため、中央は短いキーワードタグに留める(docs/spec.md 改善 / Issue #41) */}
-                <div
-                  style={{
-                    ...typography.keyword,
-                    color: color.prohibit,
-                    marginTop: 16,
-                    display: "inline-block",
-                    padding: "6px 20px",
-                    borderRadius: 999,
-                    border: `2px solid ${color.prohibit}`,
-                  }}
-                >
-                  {sting}
-                </div>
-              </div>
-            </FadeIn>
-          </Sequence>
+        <FadeIn>
+          <div style={{ ...typography.headline, color: color.paper, textAlign: "center" }}>
+            {headline}
+          </div>
+        </FadeIn>
 
-          {/* factは任意。省略された場合は事実ブロックの間はイラストと読み上げ字幕だけになり、
-              中央のタグは出さない(ブロックの尺と標識の切り替わりフレームは変わらない) */}
-          {fact && (
-            <Sequence
-              layout="none"
-              from={factBlock.from}
-              durationInFrames={factBlock.durationInFrames}
-            >
-              <FadeIn>
-                {/* 事実の全文は読み上げ字幕側が担うため、中央はキーワードタグの横並びに留める(docs/spec.md 改善 / Issue #41) */}
-                <div
-                  style={{ display: "flex", flexDirection: "column", gap: 12, alignItems: "center" }}
-                >
-                  {fact.map((line, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        ...typography.keyword,
-                        color: color.mute,
-                        padding: "6px 20px",
-                        borderRadius: 999,
-                        border: `2px solid ${color.hairline}`,
-                      }}
-                    >
-                      {line}
-                    </div>
-                  ))}
-                </div>
-              </FadeIn>
-            </Sequence>
-          )}
-
-          <Sequence
-            layout="none"
-            from={actionBlock.from}
-            durationInFrames={actionBlock.durationInFrames}
-          >
-            <FadeIn>
-              {/* actionは「今日やること」として最も強調するが、読み上げ字幕と同文になるため
-                  全文パラグラフではなくキーワードタグで見せる(docs/spec.md §4.2 / Issue #41) */}
-              <div
-                style={{
-                  ...typography.keywordEmphasis,
-                  color: color.instruct,
-                  textAlign: "center",
-                  display: "inline-block",
-                  padding: "16px 32px",
-                  borderRadius: 999,
-                  border: `3px solid ${color.instruct}`,
-                }}
-              >
-                {action}
-              </div>
-            </FadeIn>
-          </Sequence>
-
-          <Sequence
-            layout="none"
-            from={stampBlock.from}
-            durationInFrames={stampBlock.durationInFrames}
-          >
-            <FadeIn>
-              {/* 締めの一言も読み上げ字幕と同文になるため、控えめなキーワードタグで見せる(Issue #41) */}
-              <div
-                style={{
-                  ...typography.keyword,
-                  color: color.paper,
-                  textAlign: "center",
-                  display: "inline-block",
-                  padding: "6px 20px",
-                  borderRadius: 999,
-                  border: `2px solid ${color.hairline}`,
-                }}
-              >
-                {stamp}
-              </div>
-            </FadeIn>
-          </Sequence>
-        </div>
-
-        {/* itemごとのイラスト(あれば)。Item全体を通して出しっぱなしにし、上のキーワードタグだけが
-            ブロックごとに切り替わる(docs/spec.md 改善 / Issue #43フォローアップ)。
-            prohibit / instruct の2枚が指定されていれば、標識・背景・立ち絵と同じフレームで絵も差し替わる。
+        {/* itemごとのイラスト(あれば)。prohibit / instruct の2枚が指定されていれば、
+            標識・背景・立ち絵と同じフレームで絵も差し替わる(docs/spec.md 改善 / Issue #43フォローアップ)。
             立ち絵を出すときは右下のずんだもんと横に並べたいので左寄せ、出さないときは中央に置く */}
         <div
           style={{
-            alignSelf: character?.enabled ? "flex-start" : "center",
+            alignSelf: characterVisibleIn(character, "item") ? "flex-start" : "center",
             marginTop: 24,
           }}
         >

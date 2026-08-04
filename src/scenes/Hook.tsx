@@ -66,7 +66,7 @@ export const Hook: React.FC<HookProps> = ({ hook, hookNarration, id, layout, cha
       </div>
 
       {/* Hook では常に通常表情(switchAt なし。docs/spec.md §13 / Issue #18) */}
-      <Character character={character} speaking={currentLine >= 0} />
+      <Character character={character} scene="hook" speaking={currentLine >= 0} />
 
       <FadeIn>
         <div style={{ textAlign: "center" }}>

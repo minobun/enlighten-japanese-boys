@@ -15,25 +15,22 @@ const collectChecks = (episode: Episode): FieldCheckResult[] => {
   ];
 
   for (const item of episode.items) {
+    // item で画面に出るのは headline だけ(sting / fact / action / stamp は読み上げ字幕に任せ、
+    // 中央には出さなくなった)。行数チェックも画面に出るものだけを見る
     checks.push(
-      checkFieldLines(`items[${item.no}].headline`, [item.headline], fontSize.headline, maxLines.headline),
-      checkFieldLines(`items[${item.no}].sting`, [item.sting], fontSize.sting, maxLines.sting),
-      checkFieldLines(`items[${item.no}].action`, [item.action], fontSize.action, maxLines.action),
-      checkFieldLines(`items[${item.no}].stamp`, [item.stamp], fontSize.stamp, maxLines.stamp),
+      checkFieldLines(
+        `items[${item.no}].headline`,
+        [item.headline],
+        fontSize.headline,
+        maxLines.headline,
+      ),
     );
-
-    // fact は任意フィールド(画面に出さないエピソードもある)。書かれているときだけ検査する
-    if (item.fact) {
-      checks.push(
-        checkFieldLines(`items[${item.no}].fact`, item.fact, fontSize.fact, maxLines.fact),
-      );
-    }
   }
 
-  checks.push(
-    checkFieldLines("outro", episode.outro, fontSize.headline, maxLines.headline),
-    checkFieldLines("nextTeaser", [episode.nextTeaser], fontSize.stamp, maxLines.stamp),
-  );
+  if (episode.outro) {
+    checks.push(checkFieldLines("outro", episode.outro, fontSize.headline, maxLines.headline));
+  }
+  checks.push(checkFieldLines("nextTeaser", [episode.nextTeaser], fontSize.stamp, maxLines.stamp));
 
   return checks;
 };

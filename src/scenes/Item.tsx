@@ -2,14 +2,15 @@ import { useCurrentFrame } from "remotion";
 import { Background } from "../components/Background";
 import { activeLineIndex, Caption } from "../components/Caption";
 import { Character, characterVisibleIn } from "../components/Character";
-import { FadeIn } from "../components/FadeIn";
+import { Headline } from "../components/Headline";
 import { Illustration } from "../components/Illustration";
 import { Narration } from "../components/Narration";
 import { Sign } from "../components/Sign";
 import { checkFieldLines, formatOverflow, isOverflowing } from "../lineCount";
 import type { ItemLayout } from "../metadata";
 import type { CharacterConfig, Item as ItemProps } from "../schema";
-import { color, fontSize, label, maxLines, typography } from "../theme";
+import { switchableValues } from "../switchable";
+import { color, fontSize, label, maxLines } from "../theme";
 
 // 宣告 / 事実 / 行動 / スタンプ各ブロックの開始・尺は calculateMetadata が narration の
 // 音声実長から算出する(docs/spec.md §8)。このファイルでフレーム数を決めないこと。
@@ -45,7 +46,10 @@ export const Item: React.FC<ItemComponentProps> = ({
 }) => {
   const { action: actionBlock } = layout.blocks;
 
-  warnIfOverflowing(`items[${no}].headline`, [headline], "headline");
+  // 見出しは差し替え前後の両方を検査する(どちらも同じ枠に収まる必要がある)
+  for (const text of switchableValues(headline)) {
+    warnIfOverflowing(`items[${no}].headline`, [text], "headline");
+  }
 
   const frame = useCurrentFrame();
   const currentLine = activeLineIndex(frame, layout.lines);
@@ -117,11 +121,8 @@ export const Item: React.FC<ItemComponentProps> = ({
           paddingTop: 48,
         }}
       >
-        <FadeIn>
-          <div style={{ ...typography.headline, color: color.paper, textAlign: "center" }}>
-            {headline}
-          </div>
-        </FadeIn>
+        {/* 見出しも prohibit / instruct のペアなら標識と同じフレームで差し替わる */}
+        <Headline headline={headline} switchAt={actionBlock.from} />
 
         {/* itemごとのイラスト(あれば)。prohibit / instruct の2枚が指定されていれば、
             標識・背景・立ち絵と同じフレームで絵も差し替わる(docs/spec.md 改善 / Issue #43フォローアップ)。

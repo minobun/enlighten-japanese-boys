@@ -4,6 +4,7 @@ import type { FieldCheckResult } from "../src/lineCount";
 import { checkFieldLines, formatOverflow, isOverflowing } from "../src/lineCount";
 import { loadEpisode } from "../src/loadEpisode";
 import type { Episode } from "../src/schema";
+import { switchableValues } from "../src/switchable";
 import { fontSize, maxLines } from "../src/theme";
 
 // 画面に表示される全テキストフィールドを、実際に使われるフォントサイズ・行数上限で検査する
@@ -17,14 +18,12 @@ const collectChecks = (episode: Episode): FieldCheckResult[] => {
   for (const item of episode.items) {
     // item で画面に出るのは headline だけ(sting / fact / action / stamp は読み上げ字幕に任せ、
     // 中央には出さなくなった)。行数チェックも画面に出るものだけを見る
-    checks.push(
-      checkFieldLines(
-        `items[${item.no}].headline`,
-        [item.headline],
-        fontSize.headline,
-        maxLines.headline,
-      ),
-    );
+    // 見出しは差し替え前後の両方(prohibit / instruct)を検査する
+    for (const text of switchableValues(item.headline)) {
+      checks.push(
+        checkFieldLines(`items[${item.no}].headline`, [text], fontSize.headline, maxLines.headline),
+      );
+    }
   }
 
   if (episode.outro) {

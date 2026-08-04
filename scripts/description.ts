@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { findContentFile } from "./contentFile";
 import { loadEpisode } from "../src/loadEpisode";
 import type { Episode } from "../src/schema";
+import { prohibitValue } from "../src/switchable";
 
 const ROOT_DIR = join(__dirname, "..");
 const OUT_DIR = join(ROOT_DIR, "out");
@@ -18,7 +19,8 @@ export const buildDescription = (episode: Episode): string => {
   lines.push(`アラサー男性による恋愛NG集 3選【${episode.category} PART${episode.part}】`);
   lines.push("");
   for (const item of episode.items) {
-    lines.push(`・${item.headline}`);
+    // 見出しが差し替え式(prohibit / instruct)の場合、概要欄には NG 側の言い方を載せる
+    lines.push(`・${prohibitValue(item.headline)}`);
   }
   lines.push("");
   lines.push(episode.nextTeaser);

@@ -58,6 +58,10 @@ export const character = {
   centerBottomOffsetPx: 280,
 };
 
+// 見出しの表示枠の高さ。上限行数(maxLines.headline)ぶんを常に確保しておくことで、
+// 1行の見出しと2行の見出しが差し替わっても下のイラストが上下に動かない
+export const headlineRowHeightPx = Math.ceil(fontSize.headline * 1.3 * maxLines.headline);
+
 // itemイラストの表示サイズ・配置(docs/spec.md 改善 / Issue #43フォローアップ)。
 // キーワードタグの下、右下のずんだもんと横に並ぶ位置に置く。立ち絵(右)と重ならない幅に
 // 収めた上で、いらすとや等の1枚絵が主役として見える大きさにする

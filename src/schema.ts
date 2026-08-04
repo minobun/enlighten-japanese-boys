@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-// item中央のイラスト。ファイル名はすべて public/illustrations/ からの相対パス。
-// 1枚で通す場合は文字列、標識が禁止(✕)→指示(✓)に切り替わるタイミングで絵も
-// 差し替える場合は prohibit / instruct のペアで書く(<Sign> の mode と同じ語彙)
-const illustrationSchema = z.union([
+// 標識が禁止(✕)→ 指示(✓)に切り替わるタイミングで差し替えられる値。
+// 通しで同じものを使う場合は文字列1つ、差し替える場合は prohibit / instruct のペアで
+// 書く(<Sign> の mode と同じ語彙)。見出し・イラストの両方で使う
+const switchableSchema = z.union([
   z.string(),
   z.object({ prohibit: z.string(), instruct: z.string() }),
 ]);
@@ -11,7 +11,9 @@ const illustrationSchema = z.union([
 // docs/spec.md §4.1
 export const itemSchema = z.object({
   no: z.number(), // 1 | 2 | 3
-  headline: z.string(), // 項目名(例: 剃った"つもり"の髭)
+  // 項目名(例: 剃った"つもり"の髭)。prohibit / instruct のペアで書くと、標識・イラストと
+  // 同じフレームで「NGの言い方」→「やることの言い方」に差し替わる
+  headline: switchableSchema,
   // sting / action / stamp は画面には出さず(読み上げ字幕と同じ内容になるため)、
   // 台本メモとして残せるように任意フィールドにしてある(オーナー判断)
   sting: z.string().optional(), // 刺す一言(例: その「剃ったつもり」が一番危ないのだ)
@@ -24,7 +26,7 @@ export const itemSchema = z.object({
   // 中央に表示するitem専用イラスト(docs/spec.md 改善 / Issue #43フォローアップ)。
   // オーナーが用意するまでは未指定でよく、未指定の場合は<Illustration>側で描画を
   // スキップし、従来のテキスト表示のみになる
-  illustration: illustrationSchema.optional(),
+  illustration: switchableSchema.optional(),
 });
 
 // docs/spec.md §6.3。VOICEVOX パラメータをエピソード単位で上書きするための任意フィールド
@@ -105,5 +107,5 @@ export type Item = z.infer<typeof itemSchema>;
 export type Episode = z.infer<typeof episodeSchema>;
 export type CharacterConfig = z.infer<typeof characterSchema>;
 export type SceneName = "hook" | "item" | "outro";
-export type IllustrationConfig = z.infer<typeof illustrationSchema>;
+export type Switchable = z.infer<typeof switchableSchema>;
 export type CharacterPose = z.infer<typeof characterPoseSchema>;

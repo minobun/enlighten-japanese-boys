@@ -1,5 +1,6 @@
 import { getStaticFiles, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
-import type { IllustrationConfig } from "../schema";
+import type { Switchable } from "../schema";
+import { instructValue, prohibitValue } from "../switchable";
 import { illustration as illustrationTheme } from "../theme";
 import { FadeIn } from "./FadeIn";
 
@@ -12,17 +13,11 @@ import { FadeIn } from "./FadeIn";
 const SWITCH_TRANSITION_FRAMES = 6;
 
 type IllustrationProps = {
-  illustration: IllustrationConfig | undefined; // 未指定なら何も描画しない
+  illustration: Switchable | undefined; // 未指定なら何も描画しない
   // 標識と同じフレームで prohibit → instruct の絵に差し替える。
   // 未指定、または1枚だけ指定されている場合は差し替えない
   switchAt?: number;
 };
-
-const prohibitFile = (config: IllustrationConfig): string =>
-  typeof config === "string" ? config : config.prohibit;
-
-const instructFile = (config: IllustrationConfig): string =>
-  typeof config === "string" ? config : config.instruct;
 
 const staticFileExists = (path: string): boolean =>
   getStaticFiles().some((f) => f.name === path);
@@ -53,8 +48,8 @@ export const Illustration: React.FC<IllustrationProps> = ({ illustration, switch
     return null;
   }
 
-  const fromPath = `illustrations/${prohibitFile(illustration)}`;
-  const toPath = `illustrations/${instructFile(illustration)}`;
+  const fromPath = `illustrations/${prohibitValue(illustration)}`;
+  const toPath = `illustrations/${instructValue(illustration)}`;
   const hasFrom = staticFileExists(fromPath);
   const hasTo = staticFileExists(toPath);
 

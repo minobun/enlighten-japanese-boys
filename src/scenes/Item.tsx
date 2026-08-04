@@ -246,6 +246,7 @@ export const Item: React.FC<ItemComponentProps> = ({
 
         {/* itemごとのイラスト(あれば)。Item全体を通して出しっぱなしにし、上のキーワードタグだけが
             ブロックごとに切り替わる(docs/spec.md 改善 / Issue #43フォローアップ)。
+            prohibit / instruct の2枚が指定されていれば、標識・背景・立ち絵と同じフレームで絵も差し替わる。
             立ち絵を出すときは右下のずんだもんと横に並べたいので左寄せ、出さないときは中央に置く */}
         <div
           style={{
@@ -253,7 +254,7 @@ export const Item: React.FC<ItemComponentProps> = ({
             marginTop: 24,
           }}
         >
-          <Illustration file={illustration} />
+          <Illustration illustration={illustration} switchAt={actionBlock.from} />
         </div>
       </div>
     </div>

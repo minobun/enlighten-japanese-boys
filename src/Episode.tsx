@@ -30,6 +30,7 @@ export const Episode: React.FC<Props> = (props) => {
     items,
     outro,
     outroNarration,
+    outroIllustration,
     nextTeaser,
     debugSafeArea,
     layout,
@@ -78,6 +79,7 @@ export const Episode: React.FC<Props> = (props) => {
           <Outro
             outro={outro}
             outroNarration={outroNarration}
+            outroIllustration={outroIllustration}
             nextTeaser={nextTeaser}
             id={id}
             layout={resolved.outro}

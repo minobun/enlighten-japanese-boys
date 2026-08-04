@@ -3,6 +3,7 @@ import { Background } from "../components/Background";
 import { activeLineIndex, Caption } from "../components/Caption";
 import { Character } from "../components/Character";
 import { FadeIn } from "../components/FadeIn";
+import { Illustration } from "../components/Illustration";
 import { Narration } from "../components/Narration";
 import { checkFieldLines, formatOverflow, isOverflowing } from "../lineCount";
 import type { SceneLayout } from "../metadata";
@@ -12,6 +13,7 @@ import { color, fontSize, maxLines, typography } from "../theme";
 type OutroProps = {
   outro: string[];
   outroNarration: string[];
+  outroIllustration: string | undefined;
   nextTeaser: string;
   id: string;
   layout: SceneLayout;
@@ -24,6 +26,7 @@ type OutroProps = {
 export const Outro: React.FC<OutroProps> = ({
   outro,
   outroNarration,
+  outroIllustration,
   nextTeaser,
   id,
   layout,
@@ -89,6 +92,17 @@ export const Outro: React.FC<OutroProps> = ({
           {nextTeaser}
         </div>
       </FadeIn>
+
+      {/* まとめのイラスト(あれば)。Item と同じ扱いで、立ち絵を出すときは
+          右下のずんだもんと横に並べたいので左寄せ、出さないときは中央に置く */}
+      <div
+        style={{
+          alignSelf: character?.enabled ? "flex-start" : "center",
+          marginTop: 24,
+        }}
+      >
+        <Illustration illustration={outroIllustration} />
+      </div>
     </div>
   );
 };

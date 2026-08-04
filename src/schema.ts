@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+// item中央のイラスト。ファイル名はすべて public/illustrations/ からの相対パス。
+// 1枚で通す場合は文字列、標識が禁止(✕)→指示(✓)に切り替わるタイミングで絵も
+// 差し替える場合は prohibit / instruct のペアで書く(<Sign> の mode と同じ語彙)
+const illustrationSchema = z.union([
+  z.string(),
+  z.object({ prohibit: z.string(), instruct: z.string() }),
+]);
+
 // docs/spec.md §4.1
 export const itemSchema = z.object({
   no: z.number(), // 1 | 2 | 3
@@ -12,9 +20,9 @@ export const itemSchema = z.object({
   stamp: z.string(), // 締めの一言
   narration: z.array(z.string()), // TTS に読ませる文(行単位)
   // 中央に表示するitem専用イラスト(docs/spec.md 改善 / Issue #43フォローアップ)。
-  // public/illustrations/ からの相対パス。オーナーが用意するまでは未指定でよく、
-  // 未指定の場合は<Illustration>側で描画をスキップし、従来のテキスト表示のみになる
-  illustration: z.string().optional(),
+  // オーナーが用意するまでは未指定でよく、未指定の場合は<Illustration>側で描画を
+  // スキップし、従来のテキスト表示のみになる
+  illustration: illustrationSchema.optional(),
 });
 
 // docs/spec.md §6.3。VOICEVOX パラメータをエピソード単位で上書きするための任意フィールド
@@ -80,6 +88,9 @@ export const episodeSchema = z.object({
   items: z.array(itemSchema).length(3),
   outro: z.array(z.string()), // 締めの画面文言
   outroNarration: z.array(z.string()), // 締めの読み上げ文(TTS 専用)
+  // まとめ(Outro)に出すイラスト。item と同じく public/illustrations/ からの相対パス。
+  // Outro は標識の切り替えが無いので1枚だけ(未指定ならイラストなしで描画する)
+  outroIllustration: z.string().optional(),
   nextTeaser: z.string(),
   voice: voiceSchema.optional(),
   credits: z.array(z.string()).optional(), // BGM/SE等の素材クレジット(docs/spec.md §12 / Issue #14)。あれば概要欄に追記
@@ -90,4 +101,5 @@ export const episodeSchema = z.object({
 export type Item = z.infer<typeof itemSchema>;
 export type Episode = z.infer<typeof episodeSchema>;
 export type CharacterConfig = z.infer<typeof characterSchema>;
+export type IllustrationConfig = z.infer<typeof illustrationSchema>;
 export type CharacterPose = z.infer<typeof characterPoseSchema>;

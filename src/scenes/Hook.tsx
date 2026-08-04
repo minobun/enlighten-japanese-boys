@@ -65,8 +65,15 @@ export const Hook: React.FC<HookProps> = ({ hook, hookNarration, id, layout, cha
         <Sign mode="prohibit" size={SIGN_SIZE} />
       </div>
 
-      {/* Hook では常に通常表情(switchAt なし。docs/spec.md §13 / Issue #18) */}
-      <Character character={character} scene="hook" speaking={currentLine >= 0} />
+      {/* Hook では常に通常表情(switchAt なし。docs/spec.md §13 / Issue #18)。
+          まとめと同じく中央に立たせる(オーナー判断)。中央に置くのはイラストが無いシーンだけで、
+          item はイラストと横に並べるため右下のまま */}
+      <Character
+        character={character}
+        scene="hook"
+        placement="center"
+        speaking={currentLine >= 0}
+      />
 
       <FadeIn>
         <div style={{ textAlign: "center" }}>

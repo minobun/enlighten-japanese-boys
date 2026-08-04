@@ -62,6 +62,9 @@ const characterPoseSchema = z.union([
 // 立ち絵設定(docs/spec.md §13 / Issue #18)。画像はオーナーが public/character/ に配置する。
 // troubled / angry は任意で、揃っていない場合は Character コンポーネント側でフォールバックする
 export const characterSchema = z.object({
+  // 立ち絵を出すかどうか。素材の設定を消さずにオン/オフを切り替えられるようにするためのフラグで、
+  // 既定は「出さない」(オーナー判断)。出したいエピソードだけ "enabled": true を書く
+  enabled: z.boolean().default(false),
   normal: characterPoseSchema,
   troubled: characterPoseSchema.optional(),
   angry: characterPoseSchema.optional(),

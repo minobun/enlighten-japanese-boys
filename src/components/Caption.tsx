@@ -16,19 +16,25 @@ type CaptionProps = {
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
 
-// timing の塊はカタカナで元テキストと1対1対応しないため、経過した塊数(部分再生中の
-// 塊は按分)÷ 総塊数の比率をそのまま元テキストの文字位置に割り当てる(docs/spec.md §7)。
+// timing の塊はカタカナで元テキストと1対1対応しないため、塊の読み(モーラ数 = カタカナの
+// 文字数)を重みにして元テキストの文字位置へ割り当てる(docs/spec.md §7)。
+// 塊数で等分すると、長い塊と短い塊が同じ幅として扱われてハイライトが読み上げからズレる。
 const highlightRatio = (elapsedMs: number, timing: TimingChunk[]): number => {
-  const progressed = timing.reduce((total, chunk) => {
+  const weight = (chunk: TimingChunk): number => Math.max(1, chunk.text.length);
+  const total = timing.reduce((sum, chunk) => sum + weight(chunk), 0);
+
+  const progressed = timing.reduce((sum, chunk) => {
     if (elapsedMs >= chunk.endMs) {
-      return total + 1;
+      return sum + weight(chunk);
     }
     if (elapsedMs <= chunk.startMs) {
-      return total;
+      return sum;
     }
-    return total + (elapsedMs - chunk.startMs) / (chunk.endMs - chunk.startMs);
+    const within = (elapsedMs - chunk.startMs) / (chunk.endMs - chunk.startMs);
+    return sum + weight(chunk) * within;
   }, 0);
-  return clamp(progressed / timing.length, 0, 1);
+
+  return clamp(progressed / total, 0, 1);
 };
 
 // 全シーン共通の位置に固定する(docs/spec.md §7)。<SafeArea> の下端(下260pxより上)に揃うよう、

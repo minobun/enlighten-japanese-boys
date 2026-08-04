@@ -39,6 +39,7 @@
 
 ```json
 "character": {
+  "enabled": true,
   "normal": {
     "body": "normal_body.png",
     "mouth": { "closed": "mouth_closed.png", "open": "mouth_open.png" }
@@ -51,6 +52,8 @@
 }
 ```
 
+- `enabled`: 立ち絵を出すかどうか。**省略時は `false`(出さない)**。設定を消さずにオン/オフを
+  切り替えられるようにするためのフラグで、出したいエピソードだけ `true` を書く
 - `normal`: 必須。ベースの表情
 - `troubled`: NGを指摘している間に使う表情(任意)
 - `angry`: `troubled` が無い場合の代替(任意)

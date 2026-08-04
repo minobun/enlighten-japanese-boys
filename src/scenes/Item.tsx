@@ -246,8 +246,13 @@ export const Item: React.FC<ItemComponentProps> = ({
 
         {/* itemごとのイラスト(あれば)。Item全体を通して出しっぱなしにし、上のキーワードタグだけが
             ブロックごとに切り替わる(docs/spec.md 改善 / Issue #43フォローアップ)。
-            右下の立ち絵と横に並べたいので左寄せに置く */}
-        <div style={{ alignSelf: "flex-start", marginTop: 24 }}>
+            立ち絵を出すときは右下のずんだもんと横に並べたいので左寄せ、出さないときは中央に置く */}
+        <div
+          style={{
+            alignSelf: character?.enabled ? "flex-start" : "center",
+            marginTop: 24,
+          }}
+        >
           <Illustration file={illustration} />
         </div>
       </div>

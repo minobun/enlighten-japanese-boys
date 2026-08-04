@@ -80,7 +80,9 @@ export const Character: React.FC<CharacterProps> = ({
 }) => {
   const frame = useCurrentFrame();
 
-  if (!character) {
+  // enabled: false(既定)なら設定を残したまま立ち絵だけ出さない。
+  // シーン側に分岐を持たせないよう、オン/オフの判定はこのコンポーネント1箇所に集約する
+  if (!character || !character.enabled) {
     return null;
   }
 

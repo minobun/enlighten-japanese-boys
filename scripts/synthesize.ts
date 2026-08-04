@@ -1,18 +1,16 @@
-import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import type { Manifest, VoiceParams } from "./audioHash";
+import { hashLine, manifestPath as manifestPathOf, readManifest, voiceParams } from "./audioHash";
 import { findContentFile } from "./contentFile";
 import { loadEpisode } from "../src/loadEpisode";
 import { narrationLines } from "../src/narration";
-import { defaultVoice } from "../src/schema";
 
 const AUDIO_DIR = join(__dirname, "..", "public", "audio");
 const ENGINE_URL = process.env.VOICEVOX_URL ?? "http://localhost:50021";
 const SPEAKER_ID = 3; // ずんだもん・ノーマル(docs/spec.md §6.2)
 
-type VoiceParams = typeof defaultVoice;
 type AudioQuery = Record<string, unknown>;
-type Manifest = Record<string, string>;
 
 const checkEngine = async (): Promise<void> => {
   try {
@@ -29,9 +27,6 @@ const checkEngine = async (): Promise<void> => {
     process.exit(1);
   }
 };
-
-const hashLine = (text: string, voice: VoiceParams): string =>
-  createHash("sha256").update(JSON.stringify({ text, voice })).digest("hex");
 
 const fetchAudioQuery = async (text: string): Promise<AudioQuery> => {
   const url = `${ENGINE_URL}/audio_query?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}`;
@@ -65,15 +60,13 @@ const main = async () => {
   const filePath = findContentFile(id);
   const raw = JSON.parse(readFileSync(filePath, "utf-8"));
   const episode = loadEpisode(raw);
-  const voice: VoiceParams = { ...defaultVoice, ...episode.voice };
+  const voice: VoiceParams = voiceParams(episode);
 
   const outDir = join(AUDIO_DIR, id);
   mkdirSync(outDir, { recursive: true });
 
-  const manifestPath = join(outDir, "manifest.json");
-  const manifest: Manifest = existsSync(manifestPath)
-    ? JSON.parse(readFileSync(manifestPath, "utf-8"))
-    : {};
+  const manifestPath = manifestPathOf(outDir);
+  const manifest: Manifest = readManifest(outDir);
 
   // キーの命名規則は src/narration.ts に集約(尺算出・再生側と同じキーを見る必要がある)
   const lines = narrationLines(episode);

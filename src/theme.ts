@@ -60,6 +60,19 @@ export const character = {
   bottomOffsetPx: 190,
 };
 
+// itemイラストの表示サイズ・配置(docs/spec.md 改善 / Issue #43フォローアップ)。
+// キーワードタグの下、右下のずんだもんと横に並ぶ位置に置く。立ち絵(右)と重ならない幅に
+// 収めた上で、いらすとや等の1枚絵が主役として見える大きさにする
+export const illustration = {
+  maxHeightPx: 560,
+  // 右下の立ち絵(character.baseHeightPx * scale)と横に並べるため、幅は使用可能幅の左半分強に留める
+  maxWidthPx: 560,
+};
+
+// ブロックごとに入れ替わるキーワードタグの表示領域の高さ。ここを固定しておくと、
+// 宣告(見出し+タグ2行)と行動(タグ1〜2行)でタグの高さが変わっても下のイラストが動かない
+export const keywordRowHeightPx = 210;
+
 // SE(効果音)のデフォルト音量(docs/spec.md §13 / Issue #17)。ナレーションを邪魔しない程度
 export const seVolume = 0.3;
 

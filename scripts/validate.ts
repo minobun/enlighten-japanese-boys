@@ -18,10 +18,16 @@ const collectChecks = (episode: Episode): FieldCheckResult[] => {
     checks.push(
       checkFieldLines(`items[${item.no}].headline`, [item.headline], fontSize.headline, maxLines.headline),
       checkFieldLines(`items[${item.no}].sting`, [item.sting], fontSize.sting, maxLines.sting),
-      checkFieldLines(`items[${item.no}].fact`, item.fact, fontSize.fact, maxLines.fact),
       checkFieldLines(`items[${item.no}].action`, [item.action], fontSize.action, maxLines.action),
       checkFieldLines(`items[${item.no}].stamp`, [item.stamp], fontSize.stamp, maxLines.stamp),
     );
+
+    // fact は任意フィールド(画面に出さないエピソードもある)。書かれているときだけ検査する
+    if (item.fact) {
+      checks.push(
+        checkFieldLines(`items[${item.no}].fact`, item.fact, fontSize.fact, maxLines.fact),
+      );
+    }
   }
 
   checks.push(

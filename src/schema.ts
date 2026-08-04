@@ -5,7 +5,9 @@ export const itemSchema = z.object({
   no: z.number(), // 1 | 2 | 3
   headline: z.string(), // 項目名(例: 剃った"つもり"の髭)
   sting: z.string(), // 刺す一言(例: その「剃ったつもり」が一番危ないのだ)
-  fact: z.array(z.string()), // 相手側の事実(1〜2行)
+  // 相手側の事実(1〜2行)。中央に出すとイラスト・キーワードタグと情報量が競合するため任意にした
+  // (オーナー判断)。省略した場合は画面に出さず、事実ブロックの尺・標識の切り替わりはそのまま
+  fact: z.array(z.string()).optional(),
   action: z.string(), // 今日やること(画面で最も強調される)
   stamp: z.string(), // 締めの一言
   narration: z.array(z.string()), // TTS に読ませる文(行単位)

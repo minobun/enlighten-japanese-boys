@@ -13,7 +13,10 @@
   "items": [
     {
       "no": 1,
-      "headline": "ヒゲをテキトーに剃る",
+      "headline": {
+        "prohibit": "ヒゲをテキトーに剃る",
+        "instruct": "剃るのならしっかり剃る"
+      },
       "illustration": {
         "prohibit": "item_001.png",
         "instruct": "item_002.png"
@@ -27,7 +30,10 @@
     },
     {
       "no": 2,
-      "headline": "疲れた日に風呂を飛ばす",
+      "headline": {
+        "prohibit": "疲れた日に風呂を飛ばす",
+        "instruct": "疲れてもシャワーを浴びる"
+      },
       "illustration": {
         "prohibit": "item_003.png",
         "instruct": "item_004.png"
@@ -41,7 +47,10 @@
     },
     {
       "no": 3,
-      "headline": "鼻毛を見ていない",
+      "headline": {
+        "prohibit": "鼻毛を見ていない",
+        "instruct": "鏡で鼻毛出ていないかチェック！"
+      },
       "illustration": {
         "prohibit": "item_005.png",
         "instruct": "item_006.png"

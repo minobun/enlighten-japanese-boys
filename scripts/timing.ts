@@ -1,5 +1,8 @@
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { staleNarrationKeys } from "./audioHash";
+import { findContentFile } from "./contentFile";
+import { loadEpisode } from "../src/loadEpisode";
 import type { AudioQuery, ChunkMode } from "../src/timing";
 import { buildTiming } from "../src/timing";
 
@@ -76,6 +79,19 @@ const main = () => {
 
   if (keys.length === 0) {
     console.error(`${dir} に query.json が無いのだ。先に \`pnpm synthesize ${id}\` を実行するのだ`);
+    process.exit(1);
+  }
+
+  // narration を書き換えたのに合成し直していないと、字幕(content/*.json 由来)と
+  // 音声(古い wav)が別の文章になったまま動画ができてしまうので、ここで止める
+  const episode = loadEpisode(JSON.parse(readFileSync(findContentFile(id), "utf-8")));
+  const stale = staleNarrationKeys(episode, dir);
+  if (stale.length > 0) {
+    console.error(
+      `[${id}] narration と wav が食い違っているのだ(${stale.length}件): ${stale.join(", ")}\n` +
+        `content/*.json の narration か voice を変えたあとに合成し直していないのだ。\n` +
+        `\`pnpm synthesize ${id}\` を実行してから、もう一度 \`pnpm timing ${id}\` を実行するのだ`,
+    );
     process.exit(1);
   }
 

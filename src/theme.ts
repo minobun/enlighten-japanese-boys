@@ -25,8 +25,6 @@ export const fontSize = {
   fact: 56,
   action: 84,
   stamp: 52,
-  keyword: 40, // 中央のキーワードタグ専用(docs/spec.md 改善 / Issue #41)。読み上げ字幕を主役にするため、事実・締めは小さいタグ表示にする
-  keywordEmphasis: 56, // actionタグ専用。他のタグより大きくして「最も強調する」役割は保つ(docs/spec.md §4.2 / Issue #41)
   thumbnailTitle: 116, // サムネイル専用: 「恋愛NG集 3選」(docs/spec.md §13 / Issue #15)
   thumbnailSubtitle: 68, // サムネイル専用: 「{category} PART{part}」
 };
@@ -38,8 +36,6 @@ export const maxLines: Record<keyof typeof fontSize, number> = {
   fact: 2,
   action: 2,
   stamp: 1,
-  keyword: 1,
-  keywordEmphasis: 1,
   thumbnailTitle: 1,
   thumbnailSubtitle: 1,
 };
@@ -58,6 +54,21 @@ export const character = {
   // 右下配置(オーナー確認により左から右へ変更)。右は <SafeArea> の padding で既に
   // 確保済み。下は 260px セーフエリアの内側かつ <Caption> の字幕テキストと重ならない余白を確保する
   bottomOffsetPx: 190,
+  // 中央配置(まとめ)用。中央は全幅の読み上げ字幕と重なるため、右下配置より高い位置に置く
+  centerBottomOffsetPx: 280,
+};
+
+// 見出しの表示枠の高さ。上限行数(maxLines.headline)ぶんを常に確保しておくことで、
+// 1行の見出しと2行の見出しが差し替わっても下のイラストが上下に動かない
+export const headlineRowHeightPx = Math.ceil(fontSize.headline * 1.3 * maxLines.headline);
+
+// itemイラストの表示サイズ・配置(docs/spec.md 改善 / Issue #43フォローアップ)。
+// キーワードタグの下、右下のずんだもんと横に並ぶ位置に置く。立ち絵(右)と重ならない幅に
+// 収めた上で、いらすとや等の1枚絵が主役として見える大きさにする
+export const illustration = {
+  maxHeightPx: 560,
+  // 右下の立ち絵(character.baseHeightPx * scale)と横に並べるため、幅は使用可能幅の左半分強に留める
+  maxWidthPx: 560,
 };
 
 // SE(効果音)のデフォルト音量(docs/spec.md §13 / Issue #17)。ナレーションを邪魔しない程度
@@ -105,12 +116,6 @@ export const typography: Record<
   fact: { fontSize: fontSize.fact, fontFamily: fontFamily.jp, fontWeight: fontWeight.bold },
   action: { fontSize: fontSize.action, fontFamily: fontFamily.jp, fontWeight: fontWeight.black },
   stamp: { fontSize: fontSize.stamp, fontFamily: fontFamily.jp, fontWeight: fontWeight.bold },
-  keyword: { fontSize: fontSize.keyword, fontFamily: fontFamily.jp, fontWeight: fontWeight.bold },
-  keywordEmphasis: {
-    fontSize: fontSize.keywordEmphasis,
-    fontFamily: fontFamily.jp,
-    fontWeight: fontWeight.black,
-  },
   thumbnailTitle: {
     fontSize: fontSize.thumbnailTitle,
     fontFamily: fontFamily.jp,

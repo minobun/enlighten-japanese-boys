@@ -1,8 +1,9 @@
 import { useCurrentFrame } from "remotion";
 import { Background } from "../components/Background";
 import { activeLineIndex, Caption } from "../components/Caption";
-import { Character } from "../components/Character";
+import { Character, characterVisibleIn } from "../components/Character";
 import { FadeIn } from "../components/FadeIn";
+import { Illustration } from "../components/Illustration";
 import { Narration } from "../components/Narration";
 import { checkFieldLines, formatOverflow, isOverflowing } from "../lineCount";
 import type { SceneLayout } from "../metadata";
@@ -10,8 +11,9 @@ import type { CharacterConfig } from "../schema";
 import { color, fontSize, maxLines, typography } from "../theme";
 
 type OutroProps = {
-  outro: string[];
+  outro: string[] | undefined;
   outroNarration: string[];
+  outroIllustration: string | undefined;
   nextTeaser: string;
   id: string;
   layout: SceneLayout;
@@ -24,14 +26,17 @@ type OutroProps = {
 export const Outro: React.FC<OutroProps> = ({
   outro,
   outroNarration,
+  outroIllustration,
   nextTeaser,
   id,
   layout,
   character,
 }) => {
-  const outroCheck = checkFieldLines("outro", outro, fontSize.headline, maxLines.headline);
-  if (isOverflowing(outroCheck)) {
-    console.warn(formatOverflow(outroCheck));
+  if (outro) {
+    const outroCheck = checkFieldLines("outro", outro, fontSize.headline, maxLines.headline);
+    if (isOverflowing(outroCheck)) {
+      console.warn(formatOverflow(outroCheck));
+    }
   }
   const teaserCheck = checkFieldLines(
     "nextTeaser",
@@ -72,23 +77,43 @@ export const Outro: React.FC<OutroProps> = ({
         />
       )}
 
-      {/* Outro でも常に通常表情(switchAt なし。docs/spec.md §13 / Issue #18) */}
-      <Character character={character} speaking={currentLine >= 0} />
+      {/* Outro でも常に通常表情(switchAt なし。docs/spec.md §13 / Issue #18)。
+          まとめはずんだもんに中央で喋らせる(オーナー判断) */}
+      <Character
+        character={character}
+        scene="outro"
+        placement="center"
+        speaking={currentLine >= 0}
+      />
 
-      <FadeIn>
-        <div style={{ textAlign: "center" }}>
-          {outro.map((line, index) => (
-            <div key={index} style={{ ...typography.headline, color: color.paper }}>
-              {line}
-            </div>
-          ))}
-        </div>
-      </FadeIn>
+      {/* 締めの画面文言は任意。省略された場合は次回予告と立ち絵だけになる */}
+      {outro && (
+        <FadeIn>
+          <div style={{ textAlign: "center" }}>
+            {outro.map((line, index) => (
+              <div key={index} style={{ ...typography.headline, color: color.paper }}>
+                {line}
+              </div>
+            ))}
+          </div>
+        </FadeIn>
+      )}
       <FadeIn style={{ marginTop: 24 }}>
         <div style={{ ...typography.stamp, color: color.mute, textAlign: "center" }}>
           {nextTeaser}
         </div>
       </FadeIn>
+
+      {/* まとめのイラスト(あれば)。Item と同じ扱いで、立ち絵を出すときは
+          右下のずんだもんと横に並べたいので左寄せ、出さないときは中央に置く */}
+      <div
+        style={{
+          alignSelf: characterVisibleIn(character, "outro") ? "flex-start" : "center",
+          marginTop: 24,
+        }}
+      >
+        <Illustration illustration={outroIllustration} />
+      </div>
     </div>
   );
 };

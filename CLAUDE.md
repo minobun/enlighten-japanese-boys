@@ -21,6 +21,7 @@ pnpm studio                      # Remotion Studio でプレビュー
 pnpm validate ep01               # 行数オーバーチェック
 pnpm synthesize ep01             # narration を wav 化(キャッシュ付き)
 pnpm timing ep01                 # 字幕タイミング算出
+pnpm watch ep01                  # content/*.json を見張って合成+timingを自動でやり直す(studio と併用)
 pnpm run build:episode ep01      # validate→合成→timing→render→概要欄 一気通貫
 ```
 

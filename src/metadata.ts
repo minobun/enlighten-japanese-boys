@@ -19,14 +19,17 @@ const SCENE_PADDING_SEC = 0.45; // シーン間(Hook→Item、Item→Item、Item
 const LINE_PADDING_SEC = 0.3; // 行間(宣告→事実→行動→スタンプの各ブロック切り替え)
 
 // wav が無い行のフォールバック(Studio で音声未生成でも通しで見られるようにする)
-const FALLBACK_LINE_SEC = 2;
+export const FALLBACK_LINE_SEC = 2;
 
 // narration 行が1つも割り当たらないブロック(= 行数がブロック数に足りない場合)の無音尺
 const SILENT_BLOCK_SEC = 0.8;
 
-// docs/spec.md §3 の目安。外れたら警告する(尺そのものは音声に従わせる)
-const TARGET_MIN_SEC = 40;
-const TARGET_MAX_SEC = 50;
+// docs/spec.md §3 の目安。外れたら警告する(尺そのものは音声に従わせる)。
+// 当初の 40〜50秒 は ep01〜ep03 の実測(60.3s / 63.3s / 73.2s)が全部超過していて
+// 警告が出っぱなしになり、シグナルとして機能していなかったので実態に合わせて広げた。
+// docs/spec.md §4.3 R6 の字数で書くと 70〜75秒に落ち着く(Issue #53)
+export const TARGET_MIN_SEC = 55;
+export const TARGET_MAX_SEC = 80;
 
 // docs/spec.md §4.2: Item の内部構造。順序がそのまま画面の進行になる
 export const ITEM_BLOCKS = ["declare", "fact", "action", "stamp"] as const;

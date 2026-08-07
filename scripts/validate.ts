@@ -6,6 +6,7 @@ import { loadEpisode } from "../src/loadEpisode";
 import type { Episode } from "../src/schema";
 import { switchableValues } from "../src/switchable";
 import { fontSize, maxLines } from "../src/theme";
+import { checkWritingRules, formatViolation } from "../src/writingRules";
 
 // 画面に表示される全テキストフィールドを、実際に使われるフォントサイズ・行数上限で検査する
 // (docs/spec.md §5.2)。判定ロジック自体は src/lineCount.ts に共通化し、シーン側の
@@ -58,6 +59,24 @@ const main = () => {
   }
 
   console.log(`[${id}] 行数チェックOK(${checks.length}件)`);
+
+  // 執筆規約(docs/spec.md §4.3)は警告に留める。ep01〜ep03 は作り直さない方針なので
+  // ここで exit 1 すると既存エピソードの build:episode が通らなくなる(docs/spec.md §4.4)
+  const violations = checkWritingRules(episode);
+  if (violations.length > 0) {
+    console.warn(`\n[${id}] 執筆規約から外れているところがあるのだ(${violations.length}件):\n`);
+    for (const violation of violations) {
+      console.warn(formatViolation(violation));
+      console.warn("");
+    }
+    console.warn(
+      "ep01〜ep03 は作り直さない方針なので警告のみなのだ(docs/spec.md §4.3)。\n" +
+        "新しく書いたエピソードなら、書き出す前に直すのだ",
+    );
+    return;
+  }
+
+  console.log(`[${id}] 執筆規約チェックOK(docs/spec.md §4.3)`);
 };
 
 main();

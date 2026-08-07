@@ -3,6 +3,15 @@ import { join } from "node:path";
 import { staleNarrationKeys } from "./audioHash";
 import { findContentFile } from "./contentFile";
 import { loadEpisode } from "../src/loadEpisode";
+import type { SceneLayout } from "../src/metadata";
+import {
+  buildLayout,
+  FALLBACK_LINE_SEC,
+  FPS,
+  TARGET_MAX_SEC,
+  TARGET_MIN_SEC,
+} from "../src/metadata";
+import type { Episode } from "../src/schema";
 import type { AudioQuery, ChunkMode } from "../src/timing";
 import { buildTiming } from "../src/timing";
 
@@ -60,6 +69,34 @@ const wavDurationSec = (path: string): number | null => {
     offset += 8 + chunkSize + (chunkSize % 2);
   }
   return null;
+};
+
+// 「どのシーンが何秒から始まるか」の一覧(Issue #53)。src/metadata.ts の buildLayout を
+// そのまま使うので、実際にレンダリングされる位置と必ず一致する。
+// wav が読めない行は Studio と同じフォールバック秒に落とす
+const printSceneTable = (episode: Episode, dir: string): void => {
+  const layout = buildLayout(
+    episode,
+    (key) => wavDurationSec(join(dir, `${key}.wav`)) ?? FALLBACK_LINE_SEC,
+    FPS,
+  );
+  const sec = (frames: number): string => (frames / FPS).toFixed(1);
+  const row = (name: string, scene: SceneLayout): string =>
+    `  ${name.padEnd(8)}${`${sec(scene.from)}s`.padStart(7)} -> ` +
+    `${`${sec(scene.from + scene.durationInFrames)}s`.padStart(7)}  (${sec(scene.durationInFrames)}s)`;
+
+  console.log(`\n[${episode.id}] シーン別の秒数(docs/spec.md §8)`);
+  console.log(row("hook", layout.hook));
+  layout.items.forEach((item, index) => console.log(row(`item${index + 1}`, item)));
+  console.log(row("outro", layout.outro));
+
+  const total = layout.durationInFrames / FPS;
+  console.log(`  ${"合計".padEnd(7)}${total.toFixed(1)}s`);
+  if (total < TARGET_MIN_SEC || total > TARGET_MAX_SEC) {
+    console.warn(
+      `  目安の ${TARGET_MIN_SEC}〜${TARGET_MAX_SEC}秒(docs/spec.md §3)から外れているのだ`,
+    );
+  }
 };
 
 const main = () => {
@@ -122,6 +159,8 @@ const main = () => {
   if (maxDiffMs > TOLERANCE_MS) {
     console.warn(`[${id}] 許容幅を超えたキーがあるのだ。上の「要確認」行を見てほしいのだ`);
   }
+
+  printSceneTable(episode, dir);
 };
 
 main();

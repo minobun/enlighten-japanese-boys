@@ -9,8 +9,11 @@
 import type { Episode } from "./schema";
 import { prohibitValue } from "./switchable";
 
-// docs/spec.md §4.3 R6
-export const HOOK_NARRATION_MAX_CHARS = 30;
+// docs/spec.md §4.3 R6。
+// hookNarration は当初「1文・30字以内」だったが、ep04〜ep08 の実測(31/38/40/34/30字・すべて2文)が
+// 全部超過して警告が出っぱなしになり、シグナルとして機能していなかったので実態に合わせて広げた
+export const HOOK_NARRATION_MAX_CHARS = 40;
+export const HOOK_NARRATION_MAX_SENTENCES = 2;
 export const ITEM_NARRATION_MIN_CHARS = 145;
 
 // 「1つ目」「２つ目」「一つ目」いずれも拾う(docs/spec.md §4.3 R1)
@@ -83,12 +86,12 @@ const checkLength = (episode: Episode): RuleViolation[] => {
   }
 
   const hookSentences = sentenceCount(episode.hookNarration);
-  if (hookSentences > 1) {
+  if (hookSentences > HOOK_NARRATION_MAX_SENTENCES) {
     violations.push({
       rule: "R6",
       field: "hookNarration",
-      message: `hookNarration が ${hookSentences}文なのだ(1文にするのだ)`,
-      hint: "掴みは1文で言い切るのだ。2文目に置きたい内容は item に回すのだ",
+      message: `hookNarration が ${hookSentences}文なのだ(上限 ${HOOK_NARRATION_MAX_SENTENCES}文)`,
+      hint: "掴みは「お前はこうなっている」と「だから直せ」の2文までなのだ。3文目に置きたい内容は item に回すのだ",
     });
   }
 

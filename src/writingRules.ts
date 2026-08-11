@@ -102,7 +102,7 @@ const checkLength = (episode: Episode): RuleViolation[] => {
         rule: "R6",
         field: `items[${item.no}].narration`,
         message: `narration が ${chars}字なのだ(下限 ${ITEM_NARRATION_MIN_CHARS}字)`,
-        hint: "宣告 / 理由 / 刺す / 行動 の4行を全部書き切れていないのだ。抜けている要素を足すのだ",
+        hint: "宣告 / 理由 / 行動 / 念押し の4行を全部書き切れていないのだ。抜けている要素を足すのだ",
       });
     }
   }
